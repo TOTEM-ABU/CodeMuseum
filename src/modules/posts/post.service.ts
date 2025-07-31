@@ -6,21 +6,13 @@ import {
 import { PrismaService } from '../../prisma';
 import { CreatePostDto, UpdatePostDto, CreateReactionDto, CreateCommentDto } from './dto';
 import { isUUID } from 'validator';
+import { ProgrammingLanguage } from '@prisma/client';
 
 @Injectable()
 export class PostService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createPostDto: CreatePostDto, userId: string) {
-    // Check if category exists
-    const category = await this.prisma.category.findUnique({
-      where: { id: createPostDto.categoryId },
-    });
-
-    if (!category) {
-      throw new NotFoundException('Category not found');
-    }
-
     // Check if user exists
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -30,12 +22,34 @@ export class PostService {
       throw new NotFoundException('User not found');
     }
 
+    // Convert categoryName to uppercase
+    const categoryName = createPostDto.categoryName.toUpperCase();
+
+    // Validate that categoryName is in ProgrammingLanguage enum
+    if (!Object.values(ProgrammingLanguage).includes(categoryName as ProgrammingLanguage)) {
+      throw new BadRequestException(`Invalid category name. Must be one of: ${Object.values(ProgrammingLanguage).join(', ')}`);
+    }
+
+    // Find or create category
+    let category = await this.prisma.category.findFirst({
+      where: { name: categoryName },
+    });
+
+    if (!category) {
+      // Create the category if it doesn't exist
+      category = await this.prisma.category.create({
+        data: {
+          name: categoryName,
+        },
+      });
+    }
+
     const post = await this.prisma.post.create({
       data: {
         title: createPostDto.title,
         code: createPostDto.code, // Multiline text to'g'ri saqlanadi
         userId: userId,
-        categoryId: createPostDto.categoryId,
+        categoryId: category.id,
       },
       include: {
         user: {
@@ -216,24 +230,42 @@ export class PostService {
       throw new BadRequestException('You can only update your own posts');
     }
 
-    // If categoryId is provided, check if it exists
-    if (updatePostDto.categoryId) {
-      const category = await this.prisma.category.findUnique({
-        where: { id: updatePostDto.categoryId },
+    // Handle categoryName if provided
+    let categoryId: number | undefined = undefined;
+    if (updatePostDto.categoryName) {
+      // Convert categoryName to uppercase
+      const categoryName = updatePostDto.categoryName.toUpperCase();
+
+      // Validate that categoryName is in ProgrammingLanguage enum
+      if (!Object.values(ProgrammingLanguage).includes(categoryName as ProgrammingLanguage)) {
+        throw new BadRequestException(`Invalid category name. Must be one of: ${Object.values(ProgrammingLanguage).join(', ')}`);
+      }
+
+      // Find or create category
+      let category = await this.prisma.category.findFirst({
+        where: { name: categoryName },
       });
 
       if (!category) {
-        throw new NotFoundException('Category not found');
+        // Create the category if it doesn't exist
+        category = await this.prisma.category.create({
+          data: {
+            name: categoryName,
+          },
+        });
       }
+
+      categoryId = category.id;
     }
+
+    const updateData: any = {};
+    if (updatePostDto.title) updateData.title = updatePostDto.title;
+    if (updatePostDto.code) updateData.code = updatePostDto.code;
+    if (categoryId) updateData.categoryId = categoryId;
 
     const updatedPost = await this.prisma.post.update({
       where: { id },
-      data: {
-        ...(updatePostDto.title && { title: updatePostDto.title }),
-        ...(updatePostDto.code && { code: updatePostDto.code }),
-        ...(updatePostDto.categoryId && { categoryId: updatePostDto.categoryId }),
-      },
+      data: updateData,
       include: {
         user: {
           select: {

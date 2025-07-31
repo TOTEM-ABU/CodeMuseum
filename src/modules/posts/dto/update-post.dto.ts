@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsOptional, IsString, IsEnum } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { ProgrammingLanguage } from '@prisma/client';
 
 export class UpdatePostDto {
   @ApiProperty({
@@ -21,10 +23,13 @@ export class UpdatePostDto {
   code?: string;
 
   @ApiProperty({
-    description: 'Category ID',
-    example: 1,
+    description: 'Category name (must be one of the ProgrammingLanguage enum values, case insensitive)',
+    example: 'JAVASCRIPT',
+    enum: ProgrammingLanguage,
     required: false,
   })
   @IsOptional()
-  categoryId?: number;
+  @IsEnum(ProgrammingLanguage)
+  @Transform(({ value }) => value?.toUpperCase())
+  categoryName?: ProgrammingLanguage;
 } 

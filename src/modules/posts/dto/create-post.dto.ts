@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsString, IsEnum } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { ProgrammingLanguage } from '@prisma/client';
 
 export class CreatePostDto {
   @ApiProperty({
@@ -23,9 +25,12 @@ console.log(greet('World'));`,
   code: string;
 
   @ApiProperty({
-    description: 'Category ID',
-    example: 1,
+    description: 'Category name (must be one of the ProgrammingLanguage enum values, case insensitive)',
+    example: 'JAVASCRIPT',
+    enum: ProgrammingLanguage,
   })
   @IsNotEmpty()
-  categoryId: number;
+  @IsEnum(ProgrammingLanguage)
+  @Transform(({ value }) => value?.toUpperCase())
+  categoryName: ProgrammingLanguage;
 } 

@@ -5,7 +5,6 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Post,
   Put,
   Query,
 } from '@nestjs/common';
@@ -17,38 +16,12 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { CategoryService } from './category.service';
-import { CreateCategoryDto, UpdateCategoryDto } from './dto';
+import { UpdateCategoryDto } from './dto';
 
 @ApiTags('Categories')
 @Controller('categories')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
-
-  @Post()
-  @ApiOperation({ summary: 'Create a new category' })
-  @ApiResponse({
-    status: 201,
-    description: 'Category created successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        message: { type: 'string', example: 'Category created successfully' },
-        data: {
-          type: 'object',
-          properties: {
-            id: { type: 'number', example: 1 },
-            name: { type: 'string', example: 'JavaScript' },
-            createdAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' },
-            posts: { type: 'array' },
-          },
-        },
-      },
-    },
-  })
-  @ApiResponse({ status: 400, description: 'Category name already exists' })
-  async create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoryService.create(createCategoryDto);
-  }
 
   @Get()
   @ApiOperation({ summary: 'Get all categories with pagination and filtering' })

@@ -44,7 +44,7 @@ export class PostController {
             title: { type: 'string', example: 'React Hooks Example' },
             code: { type: 'string', example: 'const [count, setCount] = useState(0);' },
             userId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
-            categoryId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+            categoryId: { type: 'number', example: 1 },
             createdAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' },
             user: {
               type: 'object',
@@ -57,7 +57,7 @@ export class PostController {
             category: {
               type: 'object',
               properties: {
-                id: { type: 'string' },
+                id: { type: 'number' },
                 name: { type: 'string' },
               },
             },
@@ -67,8 +67,8 @@ export class PostController {
     },
   })
   @ApiBearerAuth()
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 404, description: 'Category or user not found' })
+  @ApiResponse({ status: 400, description: 'Bad request or invalid category name' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtGuard)
   async create(@Body() createPostDto: CreatePostDto, @User() user: any) {
@@ -183,7 +183,7 @@ export class PostController {
             title: { type: 'string' },
             code: { type: 'string' },
             userId: { type: 'string' },
-            categoryId: { type: 'string' },
+            categoryId: { type: 'number' },
             createdAt: { type: 'string' },
             user: { type: 'object' },
             category: { type: 'object' },
@@ -195,8 +195,8 @@ export class PostController {
     },
   })
   @ApiBearerAuth()
-  @ApiResponse({ status: 400, description: 'Bad request or unauthorized' })
-  @ApiResponse({ status: 404, description: 'Post or category not found' })
+  @ApiResponse({ status: 400, description: 'Bad request, unauthorized, or invalid category name' })
+  @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtGuard)
   async update(
