@@ -26,7 +26,7 @@ async function bootstrap() {
           enableImplicitConversion: true,
         },
       }),
-    );
+    );  
 
     const config = new DocumentBuilder()
       .addBearerAuth()
