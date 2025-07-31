@@ -1,15 +1,110 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum ProgrammingLanguage {
+  JAVASCRIPT
+  PYTHON
+  TYPESCRIPT
+  C
+  JAVA
+  CPP
+  CSHARP
+  RUBY
+  PHP
+  SWIFT
+  KOTLIN
+  RUST
+  GOLANG
+  ELIXIR
+  R
+  HASKELL
+  SCALA
+  DART
+}
+
+model User {
+  id        String  @id @default(uuid())
+  username  String  @unique
+  email     String?
+  password  String
+  githubURL String?
+
+  comments   Comment[]
+  posts      Post[]
+  likes      Like[]
+
+  createdAt DateTime @default(now())
+}
+
+model Comment {
+  id      String @id @default(uuid())
+  message String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  postId Int?
+  Post   Post?   @relation(fields: [postId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Post {
+  id    Int     @id @default(autoincrement())
+  title String
+  code  String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  comments     Comment[]
+  likes        Like[]
+  PostCategory PostCategory[]
+
+  createdAt DateTime @default(now())
+}
+
+model PostCategory {
+  id String @id @default(uuid())
+
+  postId Int
+  post   Post   @relation(fields: [postId], references: [id])
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  id   Int     @id @default(autoincrement())
+  name String
+
+  posts      Post[]
+  PostCategory PostCategory[]
+
+  createdAt DateTime @default(now())
+}
+
+model Like {
+  id      String @id @default(uuid())
+  like    Int
+  dislike Int
+
+  userId String?
+  User   User?   @relation(fields: [userId], references: [id])
+
+  postId Int?
+  Post   Post?   @relation(fields: [postId], references: [id])
+
+  createdAt DateTime @default(now())
 }
