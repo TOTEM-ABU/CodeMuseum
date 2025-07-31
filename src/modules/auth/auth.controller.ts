@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, Post, Res } from "@nestjs/common"
 import { AuthService } from "./auth.service";
 import { LoginDto, RegisterDto } from "./dtos";
 import { Response } from "express";
+import { Protected } from "src/decoratores";
 
 
 @Controller('auth')
@@ -10,6 +11,7 @@ export class AuthController{
   constructor(private readonly service: AuthService){}
 
   @Get()
+  @Protected(true)
   async getAll(){
     return await this.service.getAll();
   }

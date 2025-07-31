@@ -17,6 +17,7 @@ export class AuthService {
     private readonly jwt: JwtHelper,
   ) {}
 
+  
   async getAll() {
     const data = await this.prisma.user.findMany();
 
