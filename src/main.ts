@@ -34,7 +34,7 @@ async function bootstrap() {
       .setVersion('1.0')
       .build();
     const documentFactory = () => SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api', app, documentFactory);
+    SwaggerModule.setup('docs', app, documentFactory);
 
   const PORT = parseInt(process.env.APP_PORT as string) || 3000;
   const domen = process.env.SERVER_DOMEN;
