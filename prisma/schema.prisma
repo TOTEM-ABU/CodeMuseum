@@ -61,6 +61,8 @@ model Post {
   title String
   code  String
 
+  language    ProgrammingLanguage
+
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
