@@ -31,7 +31,7 @@ export class HomeController {
   }
 
   @Post('reaction')
-  addReaction(@Body() body: any) {
+  addReaction(@Body() body: ReactionDto) {
     return this.homeService.react(body);
   }
 }
