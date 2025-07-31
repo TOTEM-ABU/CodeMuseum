@@ -39,10 +39,9 @@ export class UserService {
             title: true,
             code: true,
             createdAt: true,
-            category: {
+            PostCategory: {
               select: {
-                id: true,
-                name: true,
+                id: true
               },
             },
             _count: {
@@ -133,10 +132,9 @@ export class UserService {
                   username: true,
                 },
               },
-              category: {
+              PostCategory: {
                 select: {
-                  id: true,
-                  name: true,
+                  id: true
                 },
               },
             },
@@ -220,10 +218,9 @@ export class UserService {
         skip,
         take: limit,
         include: {
-          category: {
+          PostCategory: {
             select: {
-              id: true,
-              name: true,
+              id: true
             },
           },
           comments: {
@@ -282,10 +279,9 @@ export class UserService {
                   username: true,
                 },
               },
-              category: {
+              PostCategory: {
                 select: {
-                  id: true,
-                  name: true,
+                  id: true
                 },
               },
             },

@@ -162,7 +162,7 @@ export class PostController {
   })
   @ApiResponse({ status: 400, description: 'Invalid post ID' })
   @ApiResponse({ status: 404, description: 'Post not found' })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param('id', ParseIntPipe) id: string) {
     return this.postService.findOne(id);
   }
 
@@ -200,7 +200,7 @@ export class PostController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtGuard)
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseIntPipe) id: string,
     @Body() updatePostDto: UpdatePostDto,
     @User() user: any,
   ) {
@@ -225,7 +225,7 @@ export class PostController {
   @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtGuard)
-  async remove(@Param('id', ParseIntPipe) id: number, @User() user: any) {
+  async remove(@Param('id', ParseIntPipe) id: string, @User() user: any) {
     return this.postService.remove(id, user.id);
   }
 
@@ -266,7 +266,7 @@ export class PostController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtGuard)
   async addReaction(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseIntPipe) id: string,
     @Body() createReactionDto: CreateReactionDto,
     @User() user: any,
   ) {
@@ -309,7 +309,7 @@ export class PostController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtGuard)
   async addComment(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseIntPipe) id: string,
     @Body() createCommentDto: CreateCommentDto,
     @User() user: any,
   ) {
@@ -363,7 +363,7 @@ export class PostController {
   @ApiResponse({ status: 400, description: 'Invalid post ID' })
   @ApiResponse({ status: 404, description: 'Post not found' })
   async getComments(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseIntPipe) id: string,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ) {
@@ -419,7 +419,7 @@ export class PostController {
   })
   @ApiResponse({ status: 400, description: 'Invalid post ID' })
   @ApiResponse({ status: 404, description: 'Post not found' })
-  async getReactions(@Param('id', ParseIntPipe) id: number) {
+  async getReactions(@Param('id', ParseIntPipe) id: string) {
     return this.postService.getLikesByPostId(id);
   }
 

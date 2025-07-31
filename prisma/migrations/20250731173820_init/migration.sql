@@ -3,7 +3,7 @@ CREATE TYPE "public"."ProgrammingLanguage" AS ENUM ('JAVASCRIPT', 'PYTHON', 'TYP
 
 -- CreateTable
 CREATE TABLE "public"."User" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "username" TEXT NOT NULL,
     "email" TEXT,
     "password" TEXT NOT NULL,
@@ -15,10 +15,10 @@ CREATE TABLE "public"."User" (
 
 -- CreateTable
 CREATE TABLE "public"."Comment" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "message" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "postId" TEXT,
+    "userId" UUID NOT NULL,
+    "postId" UUID NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Comment_pkey" PRIMARY KEY ("id")
@@ -26,10 +26,10 @@ CREATE TABLE "public"."Comment" (
 
 -- CreateTable
 CREATE TABLE "public"."Post" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "title" TEXT NOT NULL,
     "code" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "userId" UUID NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Post_pkey" PRIMARY KEY ("id")
@@ -37,9 +37,9 @@ CREATE TABLE "public"."Post" (
 
 -- CreateTable
 CREATE TABLE "public"."PostCategory" (
-    "id" TEXT NOT NULL,
-    "postId" TEXT NOT NULL,
-    "categoryId" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "postId" UUID NOT NULL,
+    "categoryId" UUID NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "PostCategory_pkey" PRIMARY KEY ("id")
@@ -47,9 +47,8 @@ CREATE TABLE "public"."PostCategory" (
 
 -- CreateTable
 CREATE TABLE "public"."Category" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
-    "userId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
@@ -57,11 +56,11 @@ CREATE TABLE "public"."Category" (
 
 -- CreateTable
 CREATE TABLE "public"."Like" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "like" INTEGER NOT NULL,
     "dislike" INTEGER NOT NULL,
-    "userId" TEXT,
-    "postId" TEXT,
+    "userId" UUID NOT NULL,
+    "postId" UUID NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Like_pkey" PRIMARY KEY ("id")
@@ -74,7 +73,7 @@ CREATE UNIQUE INDEX "User_username_key" ON "public"."User"("username");
 ALTER TABLE "public"."Comment" ADD CONSTRAINT "Comment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Comment" ADD CONSTRAINT "Comment_postId_fkey" FOREIGN KEY ("postId") REFERENCES "public"."Post"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."Comment" ADD CONSTRAINT "Comment_postId_fkey" FOREIGN KEY ("postId") REFERENCES "public"."Post"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."Post" ADD CONSTRAINT "Post_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -86,10 +85,7 @@ ALTER TABLE "public"."PostCategory" ADD CONSTRAINT "PostCategory_postId_fkey" FO
 ALTER TABLE "public"."PostCategory" ADD CONSTRAINT "PostCategory_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "public"."Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Category" ADD CONSTRAINT "Category_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."Like" ADD CONSTRAINT "Like_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Like" ADD CONSTRAINT "Like_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."Like" ADD CONSTRAINT "Like_postId_fkey" FOREIGN KEY ("postId") REFERENCES "public"."Post"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."Like" ADD CONSTRAINT "Like_postId_fkey" FOREIGN KEY ("postId") REFERENCES "public"."Post"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

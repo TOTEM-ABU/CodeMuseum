@@ -91,7 +91,7 @@ export class CategoryController {
   })
   @ApiResponse({ status: 400, description: 'Invalid category ID' })
   @ApiResponse({ status: 404, description: 'Category not found' })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param('id', ParseIntPipe) id: string) {
     return this.categoryService.findOne(id);
   }
 
@@ -120,7 +120,7 @@ export class CategoryController {
   @ApiResponse({ status: 400, description: 'Bad request or name already exists' })
   @ApiResponse({ status: 404, description: 'Category not found' })
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseIntPipe) id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
     return this.categoryService.update(id, updateCategoryDto);
@@ -141,7 +141,7 @@ export class CategoryController {
   })
   @ApiResponse({ status: 400, description: 'Invalid category ID or has posts' })
   @ApiResponse({ status: 404, description: 'Category not found' })
-  async remove(@Param('id', ParseIntPipe) id: number) {
+  async remove(@Param('id', ParseIntPipe) id: string) {
     return this.categoryService.remove(id);
   }
 } 

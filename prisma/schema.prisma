@@ -29,7 +29,7 @@ enum ProgrammingLanguage {
 }
 
 model User {
-  id        String  @id @default(uuid())
+  id        String  @db.Uuid @id @default(uuid())
   username  String  @unique
   email     String?
   password  String
@@ -43,28 +43,25 @@ model User {
 }
 
 model Comment {
-  id      String @id @default(uuid())
+  id      String @db.Uuid @id @default(uuid())
   message String
 
-  userId String
+  userId  String @db.Uuid
   user   User   @relation(fields: [userId], references: [id])
 
-  postId Int?
-  Post   Post?   @relation(fields: [postId], references: [id])
+  postId String @db.Uuid
+  Post   Post   @relation(fields: [postId], references: [id])
 
   createdAt DateTime @default(now())
 }
 
 model Post {
-  id    Int     @id @default(autoincrement())
+  id    String     @db.Uuid @id @default(uuid())
   title String
   code  String
 
-  userId String
+  userId String @db.Uuid
   user   User   @relation(fields: [userId], references: [id])
-
-  categoryId Int
-  category   Category @relation(fields: [categoryId], references: [id])
 
   comments     Comment[]
   likes        Like[]
@@ -74,37 +71,36 @@ model Post {
 }
 
 model PostCategory {
-  id String @id @default(uuid())
+  id String @db.Uuid @id @default(uuid())
 
-  postId Int
+  postId String @db.Uuid
   post   Post   @relation(fields: [postId], references: [id])
 
-  categoryId Int
+  categoryId String @db.Uuid
   category   Category @relation(fields: [categoryId], references: [id])
 
   createdAt DateTime @default(now())
 }
 
 model Category {
-  id   Int     @id @default(autoincrement())
+  id   String   @db.Uuid  @id @default(uuid())
   name String
 
-  posts      Post[]
   PostCategory PostCategory[]
 
   createdAt DateTime @default(now())
 }
 
 model Like {
-  id      String @id @default(uuid())
+  id      String @db.Uuid @id @default(uuid())
   like    Int
   dislike Int
 
-  userId String?
-  User   User?   @relation(fields: [userId], references: [id])
+  userId String @db.Uuid
+  User   User   @relation(fields: [userId], references: [id])
 
-  postId Int?
-  Post   Post?   @relation(fields: [postId], references: [id])
+  postId String @db.Uuid
+  Post   Post   @relation(fields: [postId], references: [id])
 
   createdAt DateTime @default(now())
 }

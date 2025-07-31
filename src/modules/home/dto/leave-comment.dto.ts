@@ -7,7 +7,7 @@ export class LeaveCommentDto {
     example: 1,
   })
   @IsNotEmpty()
-  postId: number;
+  postId: string;
 
   @ApiProperty({
     description: 'Izoh qoldirayotgan foydalanuvchining ID raqami',
