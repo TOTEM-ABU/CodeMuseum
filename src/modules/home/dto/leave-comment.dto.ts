@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsUUID, IsString } from 'class-validator';
+import { IsNotEmpty, IsUUID, IsString, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LeaveCommentDto {
@@ -13,10 +13,11 @@ export class LeaveCommentDto {
   @ApiProperty({
     description: 'Izoh qoldirayotgan foydalanuvchining ID raqami',
     example: '',
+    required: false,
   })
   @IsUUID()
-  @IsNotEmpty()
-  userId: string;
+  @IsOptional()
+  userId?: string;
 
   @ApiProperty({
     description: 'Foydalanuvchi yozgan izoh matni',

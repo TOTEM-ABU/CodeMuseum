@@ -7,18 +7,34 @@ export class HomeService {
   constructor(private prisma: PrismaService) {}
 
   async getAllPosts(p_lang?: ProgrammingLanguage, page = 1, limit = 10) {
+    const whereCondition = p_lang
+      ? {
+          PostCategory: {
+            some: {
+              category: {
+                name: {
+                  equals: p_lang,
+                  mode: 'insensitive', // katta-kichik harfni farqlamaslik uchun
+                },
+              },
+            },
+          },
+        }
+      : {};
+
     return this.prisma.post.findMany({
-      where: p_lang
+      where: Object.keys(whereCondition).length
         ? {
             PostCategory: {
               some: {
                 category: {
-                  name: p_lang,
+                  name: whereCondition.PostCategory?.some?.category?.name
+                    ?.equals,
                 },
               },
             },
           }
-        : {},
+        : undefined,
       skip: (page - 1) * limit,
       take: limit,
       include: {
@@ -35,7 +51,15 @@ export class HomeService {
     });
   }
 
-  async leaveComment(dto: { postId: string; userId: string; message: string }) {
+  async leaveComment(dto: {
+    postId: string;
+    userId?: string;
+    message: string;
+  }) {
+    if (!dto.userId) {
+      throw new Error('userId is required for creating a comment');
+    }
+
     return this.prisma.comment.create({
       data: {
         message: dto.message,
@@ -59,13 +83,22 @@ export class HomeService {
     });
   }
 
-  async react(dto: { postId: string; userId: string; like: number; dislike: number }) {
+  async react(dto: {
+    postId: string;
+    userId?: string;
+    like?: number;
+    dislike?: number;
+  }) {
+    if (!dto.userId) {
+      throw new Error('userId is required for creating a reaction');
+    }
+
     return this.prisma.like.create({
       data: {
         postId: dto.postId,
         userId: dto.userId,
-        like: dto.like,
-        dislike: dto.dislike,
+        like: dto.like || 0,
+        dislike: dto.dislike || 0,
       },
     });
   }
