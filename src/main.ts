@@ -29,6 +29,7 @@ async function bootstrap() {
     );
 
     const config = new DocumentBuilder()
+      .addBearerAuth()
       .setTitle('Codes example')
       .setDescription('The Code API description')
       .setVersion('1.0')
