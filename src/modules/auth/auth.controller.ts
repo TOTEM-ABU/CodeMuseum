@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { LoginDto, RegisterDto } from "./dtos";
 import { Response } from "express";
+import { Protected } from "src/decoratores";
 
 
 @ApiTags('Authentication')

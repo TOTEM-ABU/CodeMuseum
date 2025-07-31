@@ -52,8 +52,8 @@ export class HomeService {
       data: {
         postId: dto.postId,
         userId: dto.userId,
-        like: dto.like,
-        dislike: dto.dislike,
+        like: dto.like || 0,
+        dislike: dto.dislike || 0,
       },
     });
   }
