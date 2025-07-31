@@ -11,12 +11,11 @@ export class LeaveCommentDto {
 
   @ApiProperty({
     description: 'Izoh qoldirayotgan foydalanuvchining ID raqami',
-    example: '',
-    required: false,
+    example: 'user-uuid-here',
   })
   @IsUUID()
-  @IsOptional()
-  userId?: string;
+  @IsNotEmpty()
+  userId: string;
 
   @ApiProperty({
     description: 'Foydalanuvchi yozgan izoh matni',

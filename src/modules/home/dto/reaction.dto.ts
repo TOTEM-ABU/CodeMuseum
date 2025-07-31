@@ -1,4 +1,4 @@
-import { IsUUID, IsInt, Min, IsOptional } from 'class-validator';
+import { IsUUID, IsInt, Min, IsOptional, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ReactionDto {
@@ -10,30 +10,27 @@ export class ReactionDto {
 
   @ApiProperty({
     description: 'Reaksiya yuborayotgan foydalanuvchining ID raqami',
-    example: '',
-    required: false,
+    example: 'user-uuid-here',
   })
   @IsUUID()
-  @IsOptional()
-  userId?: string;
+  @IsNotEmpty()
+  userId: string;
 
   @ApiProperty({
     description: 'Like (yoqdi) soni — odatda 0 yoki 1',
     example: 1,
-    required: false,
   })
   @IsInt()
   @Min(0)
-  @IsOptional()
-  like?: number;
+  @IsNotEmpty()
+  like: number;
 
   @ApiProperty({
     description: 'Dislike (yoqmadi) soni — odatda 0 yoki 1',
     example: 0,
-    required: false,
   })
   @IsInt()
   @Min(0)
-  @IsOptional()
-  dislike?: number;
+  @IsNotEmpty()
+  dislike: number;
 }

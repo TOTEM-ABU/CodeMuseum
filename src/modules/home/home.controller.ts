@@ -19,7 +19,6 @@ export class HomeController {
   ) {
     return this.homeService.getAllPosts(categoryId ? Number(categoryId) : undefined, Number(page) || 1, Number(limit) || 10);
   }
-  }
 
   @Post('leave-comment')
   leaveComment(@Body() body: LeaveCommentDto) {
