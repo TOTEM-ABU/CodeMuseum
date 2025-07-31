@@ -33,7 +33,7 @@ export class PostService {
     const post = await this.prisma.post.create({
       data: {
         title: createPostDto.title,
-        code: createPostDto.code,
+        code: createPostDto.code, // Multiline text to'g'ri saqlanadi
         userId: userId,
         categoryId: createPostDto.categoryId,
       },

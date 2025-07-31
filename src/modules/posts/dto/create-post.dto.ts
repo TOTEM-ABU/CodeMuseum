@@ -11,8 +11,12 @@ export class CreatePostDto {
   title: string;
 
   @ApiProperty({
-    description: 'Code content',
-    example: 'const [count, setCount] = useState(0);',
+    description: 'Code content (multiline text supported)',
+    example: `function greet(name) {
+  return \`Hello, \${name}!\`;
+}
+
+console.log(greet('World'));`,
   })
   @IsNotEmpty()
   @IsString()
