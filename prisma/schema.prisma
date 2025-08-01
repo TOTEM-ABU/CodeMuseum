@@ -14,9 +14,9 @@ model User {
   password  String
   githubURL String?
 
-  comments Comment[]
-  posts    Post[]
-  likes    Like[]
+  comments  Comment[]
+  posts     Post[]
+  reactions Reaction[]
 
   createdAt DateTime @default(now())
 }
@@ -43,7 +43,7 @@ model Post {
   user   User   @relation(fields: [userId], references: [id])
 
   comments     Comment[]
-  likes        Like[]
+  reactions    Reaction[]
   PostCategory PostCategory[]
 
   createdAt DateTime @default(now())
@@ -70,7 +70,7 @@ model Category {
   createdAt DateTime @default(now())
 }
 
-model Like {
+model Reaction {
   id      String @id @default(uuid()) @db.Uuid
   like    Int
   dislike Int

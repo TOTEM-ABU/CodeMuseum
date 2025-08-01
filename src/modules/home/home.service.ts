@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { ProgrammingLanguage } from '@prisma/client';
 import { LeaveCommentDto } from './dto';
 
 @Injectable()
@@ -23,7 +22,7 @@ export class HomeService {
       include: {
         user: true,
         comments: true,
-        likes: true,
+        reactions: true,
         PostCategory: true,
       },
       orderBy: {
@@ -62,7 +61,7 @@ export class HomeService {
     like: number;
     dislike: number;
   }) {
-    return this.prisma.like.create({
+    return this.prisma.reaction.create({
       data: {
         postId: dto.postId,
         userId: dto.userId,

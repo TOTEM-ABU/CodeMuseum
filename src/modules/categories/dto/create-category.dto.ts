@@ -1,16 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsEnum } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { ProgrammingLanguage } from '@prisma/client';
 
 export class CreateCategoryDto {
   @ApiProperty({
-    description: 'Category name (must be one of the ProgrammingLanguage enum values, case insensitive)',
+    description: 'Category name',
     example: 'JAVASCRIPT',
-    enum: ProgrammingLanguage,
   })
   @IsNotEmpty()
-  @IsEnum(ProgrammingLanguage)
+  @IsString()
   @Transform(({ value }) => value?.toUpperCase())
-  name: ProgrammingLanguage;
+  name: string;
 } 

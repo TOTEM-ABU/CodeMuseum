@@ -28,7 +28,7 @@ export class UserService {
           select: {
             posts: true,
             comments: true,
-            likes: true, // reactions uchun ham likes table dan hisoblanadi
+            reactions: true, // reactions uchun ham reactions table dan hisoblanadi
           },
         },
         posts: {
@@ -41,12 +41,12 @@ export class UserService {
             createdAt: true,
             PostCategory: {
               select: {
-                id: true
+                id: true,
               },
             },
             _count: {
               select: {
-                likes: true,
+                reactions: true,
                 comments: true,
               },
             },
@@ -67,7 +67,7 @@ export class UserService {
             },
           },
         },
-        likes: {
+        reactions: {
           take: 5,
           orderBy: { createdAt: 'desc' },
           select: {
@@ -96,7 +96,12 @@ export class UserService {
     };
   }
 
-  async getMyReactions(userId: string, page = 1, limit = 10, type?: 'like' | 'dislike') {
+  async getMyReactions(
+    userId: string,
+    page = 1,
+    limit = 10,
+    type?: 'like' | 'dislike',
+  ) {
     if (!isUUID(userId)) {
       throw new BadRequestException('Invalid user ID');
     }
@@ -105,7 +110,7 @@ export class UserService {
 
     // Build where clause for filtering
     let where: any = { userId };
-    
+
     if (type) {
       if (type === 'like') {
         where.like = 1;
@@ -115,7 +120,7 @@ export class UserService {
     }
 
     const [reactions, total] = await Promise.all([
-      this.prisma.like.findMany({
+      this.prisma.reaction.findMany({
         where,
         skip,
         take: limit,
@@ -134,7 +139,7 @@ export class UserService {
               },
               PostCategory: {
                 select: {
-                  id: true
+                  id: true,
                 },
               },
             },
@@ -144,7 +149,7 @@ export class UserService {
           createdAt: 'desc',
         },
       }),
-      this.prisma.like.count({ where }),
+      this.prisma.reaction.count({ where }),
     ]);
 
     return {
@@ -220,7 +225,7 @@ export class UserService {
         include: {
           PostCategory: {
             select: {
-              id: true
+              id: true,
             },
           },
           comments: {
@@ -233,7 +238,7 @@ export class UserService {
               },
             },
           },
-          likes: true,
+          reactions: true,
         },
         orderBy: {
           createdAt: 'desc',
@@ -281,7 +286,7 @@ export class UserService {
               },
               PostCategory: {
                 select: {
-                  id: true
+                  id: true,
                 },
               },
             },
@@ -305,4 +310,4 @@ export class UserService {
       },
     };
   }
-} 
+}

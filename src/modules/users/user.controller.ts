@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Put,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Put, Query, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -33,7 +26,10 @@ export class UserController {
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: 'User profile retrieved successfully' },
+        message: {
+          type: 'string',
+          example: 'User profile retrieved successfully',
+        },
         data: {
           type: 'object',
           properties: {
@@ -41,15 +37,15 @@ export class UserController {
             username: { type: 'string' },
             email: { type: 'string' },
             githubURL: { type: 'string' },
-                         createdAt: { type: 'string' },
-                         _count: {
-               type: 'object',
-               properties: {
-                 posts: { type: 'number' },
-                 comments: { type: 'number' },
-                 likes: { type: 'number' }, // reactions uchun ham likes table dan hisoblanadi
-               },
-             },
+            createdAt: { type: 'string' },
+            _count: {
+              type: 'object',
+              properties: {
+                posts: { type: 'number' },
+                comments: { type: 'number' },
+                reactions: { type: 'number' }, // reactions uchun ham reactions table dan hisoblanadi
+              },
+            },
             posts: {
               type: 'array',
               items: {
@@ -76,19 +72,19 @@ export class UserController {
                 },
               },
             },
-                         likes: {
-               type: 'array',
-               items: {
-                 type: 'object',
-                 properties: {
-                   id: { type: 'string' },
-                   like: { type: 'number' },
-                   dislike: { type: 'number' },
-                   createdAt: { type: 'string' },
-                   Post: { type: 'object' },
-                 },
-               },
-             },
+            reactions: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  like: { type: 'number' },
+                  dislike: { type: 'number' },
+                  createdAt: { type: 'string' },
+                  Post: { type: 'object' },
+                },
+              },
+            },
           },
         },
       },
@@ -105,13 +101,13 @@ export class UserController {
   @ApiOperation({ summary: 'Get current user reactions (likes/dislikes)' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
-  @ApiQuery({ 
-    name: 'type', 
-    required: false, 
-    type: String, 
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    type: String,
     enum: ['like', 'dislike'],
     description: 'Filter by reaction type: "like" or "dislike"',
-    example: 'like'
+    example: 'like',
   })
   @ApiResponse({
     status: 200,
@@ -119,7 +115,10 @@ export class UserController {
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: 'User reactions retrieved successfully' },
+        message: {
+          type: 'string',
+          example: 'User reactions retrieved successfully',
+        },
         data: {
           type: 'array',
           items: {
@@ -163,7 +162,12 @@ export class UserController {
     @Query('limit') limit?: number,
     @Query('type') type?: 'like' | 'dislike',
   ) {
-    return this.userService.getMyReactions(user.id, page || 1, limit || 10, type);
+    return this.userService.getMyReactions(
+      user.id,
+      page || 1,
+      limit || 10,
+      type,
+    );
   }
 
   @Get('my-posts')
@@ -176,7 +180,10 @@ export class UserController {
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: 'User posts retrieved successfully' },
+        message: {
+          type: 'string',
+          example: 'User posts retrieved successfully',
+        },
         data: {
           type: 'array',
           items: {
@@ -188,7 +195,7 @@ export class UserController {
               createdAt: { type: 'string' },
               category: { type: 'object' },
               comments: { type: 'array' },
-              likes: { type: 'array' },
+              reactions: { type: 'array' },
             },
           },
         },
@@ -224,7 +231,10 @@ export class UserController {
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: 'User comments retrieved successfully' },
+        message: {
+          type: 'string',
+          example: 'User comments retrieved successfully',
+        },
         data: {
           type: 'array',
           items: {
@@ -277,24 +287,33 @@ export class UserController {
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: 'User settings updated successfully' },
+        message: {
+          type: 'string',
+          example: 'User settings updated successfully',
+        },
         data: {
           type: 'object',
-                      properties: {
-              id: { type: 'string' },
-              username: { type: 'string' },
-              email: { type: 'string' },
-              githubURL: { type: 'string' },
-              createdAt: { type: 'string' },
-            },
+          properties: {
+            id: { type: 'string' },
+            username: { type: 'string' },
+            email: { type: 'string' },
+            githubURL: { type: 'string' },
+            createdAt: { type: 'string' },
+          },
         },
       },
     },
   })
-  @ApiResponse({ status: 400, description: 'Invalid data or username already taken' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid data or username already taken',
+  })
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async updateSettings(@User() user: any, @Body() updateUserDto: UpdateUserDto) {
+  async updateSettings(
+    @User() user: any,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
     return this.userService.updateSettings(user.id, updateUserDto);
   }
-} 
+}

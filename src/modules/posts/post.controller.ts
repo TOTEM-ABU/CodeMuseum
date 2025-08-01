@@ -18,7 +18,12 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { PostService } from './post.service';
-import { CreatePostDto, UpdatePostDto, CreateReactionDto, CreateCommentDto } from './dto';
+import {
+  CreatePostDto,
+  UpdatePostDto,
+  CreateReactionDto,
+  CreateCommentDto,
+} from './dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { User } from '../auth/decorators/user.decorator';
 
@@ -39,10 +44,19 @@ export class PostController {
         data: {
           type: 'object',
           properties: {
-            id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+            id: {
+              type: 'string',
+              example: '123e4567-e89b-12d3-a456-426614174000',
+            },
             title: { type: 'string', example: 'React Hooks Example' },
-            code: { type: 'string', example: 'const [count, setCount] = useState(0);' },
-            userId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+            code: {
+              type: 'string',
+              example: 'const [count, setCount] = useState(0);',
+            },
+            userId: {
+              type: 'string',
+              example: '123e4567-e89b-12d3-a456-426614174000',
+            },
             createdAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' },
             user: {
               type: 'object',
@@ -59,7 +73,10 @@ export class PostController {
     },
   })
   @ApiBearerAuth()
-  @ApiResponse({ status: 400, description: 'Bad request or invalid category name' })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request or invalid category name',
+  })
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtGuard)
@@ -71,8 +88,19 @@ export class PostController {
   @ApiOperation({ summary: 'Get all posts with pagination and filtering' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
-  @ApiQuery({ name: 'categoryId', required: false, type: String, description: 'Filter by category ID' })
-  @ApiQuery({ name: 'categoryName', required: false, type: String, example: 'JavaScript', description: 'Filter by category name (can be multiple)' })
+  @ApiQuery({
+    name: 'categoryId',
+    required: false,
+    type: String,
+    description: 'Filter by category ID',
+  })
+  @ApiQuery({
+    name: 'categoryName',
+    required: false,
+    type: String,
+    example: 'JavaScript',
+    description: 'Filter by category name (can be multiple)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Posts retrieved successfully',
@@ -93,7 +121,7 @@ export class PostController {
               user: { type: 'object' },
               PostCategory: { type: 'array' },
               comments: { type: 'array' },
-              likes: { type: 'array' },
+              reactions: { type: 'array' },
             },
           },
         },
@@ -116,16 +144,20 @@ export class PostController {
     @Query('categoryName') categoryName?: string | string[],
   ) {
     return this.postService.findAll(
-      page || 1, 
-      limit || 10, 
+      page || 1,
+      limit || 10,
       categoryId,
-      categoryName
+      categoryName,
     );
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a specific post by ID' })
-  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @ApiResponse({
     status: 200,
     description: 'Post retrieved successfully',
@@ -144,7 +176,7 @@ export class PostController {
             user: { type: 'object' },
             PostCategory: { type: 'array' },
             comments: { type: 'array' },
-            likes: { type: 'array' },
+            reactions: { type: 'array' },
           },
         },
       },
@@ -158,7 +190,11 @@ export class PostController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Update a post' })
-  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @ApiResponse({
     status: 200,
     description: 'Post updated successfully',
@@ -177,14 +213,17 @@ export class PostController {
             user: { type: 'object' },
             PostCategory: { type: 'array' },
             comments: { type: 'array' },
-            likes: { type: 'array' },
+            reactions: { type: 'array' },
           },
         },
       },
     },
   })
   @ApiBearerAuth()
-  @ApiResponse({ status: 400, description: 'Bad request or invalid category name' })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request or invalid category name',
+  })
   @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtGuard)
@@ -198,7 +237,11 @@ export class PostController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a post' })
-  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @ApiResponse({
     status: 200,
     description: 'Post deleted successfully',
@@ -220,7 +263,11 @@ export class PostController {
 
   @Post(':id/reactions')
   @ApiOperation({ summary: 'Add a reaction to a post' })
-  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @ApiResponse({
     status: 201,
     description: 'Reaction added successfully',
@@ -252,12 +299,16 @@ export class PostController {
     @Body() createReactionDto: CreateReactionDto,
     @User() user: any,
   ) {
-    return this.postService.addLike(id, user.id, createReactionDto);
+    return this.postService.addReaction(id, user.id, createReactionDto);
   }
 
   @Post(':id/comment')
   @ApiOperation({ summary: 'Add a comment to a post' })
-  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @ApiResponse({
     status: 201,
     description: 'Comment added successfully',
@@ -294,7 +345,11 @@ export class PostController {
 
   @Get(':id/comments')
   @ApiOperation({ summary: 'Get comments for a specific post with pagination' })
-  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({
@@ -342,14 +397,21 @@ export class PostController {
 
   @Get(':id/reactions')
   @ApiOperation({ summary: 'Get reactions for a specific post' })
-  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @ApiResponse({
     status: 200,
     description: 'Reactions retrieved successfully',
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: 'Reactions retrieved successfully' },
+        message: {
+          type: 'string',
+          example: 'Reactions retrieved successfully',
+        },
         data: {
           type: 'array',
           items: {
@@ -371,12 +433,16 @@ export class PostController {
   @ApiResponse({ status: 400, description: 'Invalid post ID' })
   @ApiResponse({ status: 404, description: 'Post not found' })
   async getReactions(@Param('id') id: string) {
-    return this.postService.getLikesByPostId(id);
+    return this.postService.getReactionsByPostId(id);
   }
 
   @Get('user/:userId')
   @ApiOperation({ summary: 'Get posts by user ID with pagination' })
-  @ApiParam({ name: 'userId', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiParam({
+    name: 'userId',
+    type: 'string',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({
@@ -385,7 +451,10 @@ export class PostController {
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: 'User posts retrieved successfully' },
+        message: {
+          type: 'string',
+          example: 'User posts retrieved successfully',
+        },
         data: {
           type: 'array',
           items: {
@@ -399,7 +468,7 @@ export class PostController {
               user: { type: 'object' },
               PostCategory: { type: 'array' },
               comments: { type: 'array' },
-              likes: { type: 'array' },
+              reactions: { type: 'array' },
             },
           },
         },

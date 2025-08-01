@@ -5,18 +5,12 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto';
-import { ProgrammingLanguage } from '@prisma/client';
 
 @Injectable()
 export class CategoryService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
-    // Validate that categoryName is in ProgrammingLanguage enum
-    if (!Object.values(ProgrammingLanguage).includes(createCategoryDto.name)) {
-      throw new BadRequestException(`Invalid category name. Must be one of: ${Object.values(ProgrammingLanguage).join(', ')}`);
-    }
-
     // Check if category already exists
     const existingCategory = await this.prisma.category.findFirst({
       where: { name: createCategoryDto.name },
@@ -149,7 +143,7 @@ export class CategoryService {
                     },
                   },
                 },
-                likes: true,
+                reactions: true,
               },
             },
           },
@@ -249,4 +243,4 @@ export class CategoryService {
       message: 'Category deleted successfully',
     };
   }
-} 
+}

@@ -11,7 +11,6 @@ import {
   CreateCommentDto,
 } from './dto';
 import { isUUID } from 'validator';
-import { ProgrammingLanguage } from '@prisma/client';
 
 @Injectable()
 export class PostService {
@@ -30,18 +29,15 @@ export class PostService {
     // Convert categoryName to uppercase
     const categoryName = createPostDto.categoryName.toUpperCase();
 
-    // Validate that categoryName is in ProgrammingLanguage enum
-    if (!Object.values(ProgrammingLanguage).includes(categoryName as ProgrammingLanguage)) {
-      throw new BadRequestException(`Invalid category name. Must be one of: ${Object.values(ProgrammingLanguage).join(', ')}`);
-    }
-
     // Find existing category
     const category = await this.prisma.category.findFirst({
       where: { name: categoryName },
     });
 
     if (!category) {
-      throw new BadRequestException(`Category '${categoryName}' does not exist. Please create the category first or use an existing category name.`);
+      throw new BadRequestException(
+        `Category '${categoryName}' does not exist. Please create the category first or use an existing category name.`,
+      );
     }
 
     const post = await this.prisma.post.create({
@@ -83,7 +79,7 @@ export class PostService {
             },
           },
         },
-        likes: true,
+        reactions: true,
       },
     });
 
@@ -93,7 +89,12 @@ export class PostService {
     };
   }
 
-  async findAll(page = 1, limit = 10, categoryId?: string, categoryName?: string | string[]) {
+  async findAll(
+    page = 1,
+    limit = 10,
+    categoryId?: string,
+    categoryName?: string | string[],
+  ) {
     const skip = (page - 1) * limit;
     let where: any = {};
 
@@ -119,15 +120,17 @@ export class PostService {
         take: limit,
         include: {
           user: { select: { id: true, username: true, githubURL: true } },
-          PostCategory: { 
-            include: { 
-              category: { 
-                select: { id: true, name: true } 
-              } 
-            } 
+          PostCategory: {
+            include: {
+              category: {
+                select: { id: true, name: true },
+              },
+            },
           },
-          comments: { include: { user: { select: { id: true, username: true } } } },
-          likes: true,
+          comments: {
+            include: { user: { select: { id: true, username: true } } },
+          },
+          reactions: true,
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -179,7 +182,7 @@ export class PostService {
             createdAt: 'desc',
           },
         },
-        likes: true,
+        reactions: true,
       },
     });
 
@@ -217,18 +220,15 @@ export class PostService {
       // Convert categoryName to uppercase
       const categoryName = updatePostDto.categoryName.toUpperCase();
 
-      // Validate that categoryName is in ProgrammingLanguage enum
-      if (!Object.values(ProgrammingLanguage).includes(categoryName as ProgrammingLanguage)) {
-        throw new BadRequestException(`Invalid category name. Must be one of: ${Object.values(ProgrammingLanguage).join(', ')}`);
-      }
-
       // Find existing category
       const category = await this.prisma.category.findFirst({
         where: { name: categoryName },
       });
 
       if (!category) {
-        throw new BadRequestException(`Category '${categoryName}' does not exist. Please create the category first or use an existing category name.`);
+        throw new BadRequestException(
+          `Category '${categoryName}' does not exist. Please create the category first or use an existing category name.`,
+        );
       }
 
       categoryId = category.id;
@@ -269,7 +269,7 @@ export class PostService {
             },
           },
         },
-        likes: true,
+        reactions: true,
       },
     });
 
@@ -334,8 +334,10 @@ export class PostService {
         include: {
           user: { select: { id: true, username: true, githubURL: true } },
           PostCategory: { select: { id: true } },
-          comments: { include: { user: { select: { id: true, username: true } } } },
-          likes: true,
+          comments: {
+            include: { user: { select: { id: true, username: true } } },
+          },
+          reactions: true,
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -349,34 +351,45 @@ export class PostService {
     };
   }
 
-  async addLike(postId: string, userId: string, createReactionDto: CreateReactionDto) {
-
+  async addReaction(
+    postId: string,
+    userId: string,
+    createReactionDto: CreateReactionDto,
+  ) {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
     if (!post) throw new NotFoundException('Post not found');
 
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
-    const existingLike = await this.prisma.like.findFirst({ where: { postId, userId } });
+    const existingReaction = await this.prisma.reaction.findFirst({
+      where: { postId, userId },
+    });
     const likeValue = createReactionDto.type === 'like' ? 1 : 0;
     const dislikeValue = createReactionDto.type === 'dislike' ? 1 : 0;
 
-    const like = existingLike
-      ? await this.prisma.like.update({
-          where: { id: existingLike.id },
+    const reaction = existingReaction
+      ? await this.prisma.reaction.update({
+          where: { id: existingReaction.id },
           data: { like: likeValue, dislike: dislikeValue },
           include: { User: { select: { id: true, username: true } } },
         })
-      : await this.prisma.like.create({
+      : await this.prisma.reaction.create({
           data: { like: likeValue, dislike: dislikeValue, userId, postId },
           include: { User: { select: { id: true, username: true } } },
         });
 
-    return { message: `${createReactionDto.type} updated successfully`, data: like };
+    return {
+      message: `${createReactionDto.type} updated successfully`,
+      data: reaction,
+    };
   }
 
-  async addComment(postId: string, userId: string, createCommentDto: CreateCommentDto) {
-
+  async addComment(
+    postId: string,
+    userId: string,
+    createCommentDto: CreateCommentDto,
+  ) {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
     if (!post) throw new NotFoundException('Post not found');
 
@@ -412,25 +425,24 @@ export class PostService {
     };
   }
 
-  async getLikesByPostId(postId: string) {
-
-    const likes = await this.prisma.like.findMany({
+  async getReactionsByPostId(postId: string) {
+    const reactions = await this.prisma.reaction.findMany({
       where: { postId },
       include: { User: { select: { id: true, username: true } } },
       orderBy: { createdAt: 'desc' },
     });
 
-    const totalLikes = likes.filter((l) => l.like === 1).length;
-    const totalDislikes = likes.filter((l) => l.dislike === 1).length;
+    const totalLikes = reactions.filter((r) => r.like === 1).length;
+    const totalDislikes = reactions.filter((r) => r.dislike === 1).length;
 
     return {
-      message: 'Likes retrieved successfully',
+      message: 'Reactions retrieved successfully',
       data: {
-        likes,
+        reactions,
         summary: {
           totalLikes,
           totalDislikes,
-          totalReactions: likes.length,
+          totalReactions: reactions.length,
         },
       },
     };

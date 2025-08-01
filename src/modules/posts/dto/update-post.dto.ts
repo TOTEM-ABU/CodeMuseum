@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsEnum } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { ProgrammingLanguage } from '@prisma/client';
 
 export class UpdatePostDto {
   @ApiProperty({
@@ -15,7 +14,8 @@ export class UpdatePostDto {
 
   @ApiProperty({
     description: 'Code content',
-    example: 'const [count, setCount] = useState(0);\nreturn <div>{count}</div>;',
+    example:
+      'const [count, setCount] = useState(0);\nreturn <div>{count}</div>;',
     required: false,
   })
   @IsOptional()
@@ -23,13 +23,12 @@ export class UpdatePostDto {
   code?: string;
 
   @ApiProperty({
-    description: 'Category name (must be one of the ProgrammingLanguage enum values, case insensitive)',
+    description: 'Category name',
     example: 'JAVASCRIPT',
-    enum: ProgrammingLanguage,
     required: false,
   })
   @IsOptional()
-  @IsEnum(ProgrammingLanguage)
+  @IsString()
   @Transform(({ value }) => value?.toUpperCase())
-  categoryName?: ProgrammingLanguage;
-} 
+  categoryName?: string;
+}
