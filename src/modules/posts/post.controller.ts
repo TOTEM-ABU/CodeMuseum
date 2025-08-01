@@ -20,6 +20,7 @@ import {
 import { PostService } from './post.service';
 import {
   CreatePostDto,
+  CreateAnonymousPostDto,
   UpdatePostDto,
   CreateReactionDto,
   CreateCommentDto,
@@ -82,6 +83,54 @@ export class PostController {
   @UseGuards(JwtGuard)
   async create(@Body() createPostDto: CreatePostDto, @User() user: any) {
     return this.postService.create(createPostDto, user.id);
+  }
+
+  @Post('anonymous')
+  @ApiOperation({ summary: 'Create an anonymous post (no authentication required)' })
+  @ApiResponse({
+    status: 201,
+    description: 'Anonymous post created successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Anonymous post created successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              example: '123e4567-e89b-12d3-a456-426614174000',
+            },
+            title: { type: 'string', example: 'React Hooks Example' },
+            code: {
+              type: 'string',
+              example: 'const [count, setCount] = useState(0);',
+            },
+            userId: {
+              type: 'string',
+              example: '123e4567-e89b-12d3-a456-426614174000',
+            },
+            createdAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' },
+            user: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                username: { type: 'string', example: 'anonymous' },
+                githubURL: { type: 'string' },
+              },
+            },
+            PostCategory: { type: 'array' },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request or invalid category name',
+  })
+  async createAnonymous(@Body() createAnonymousPostDto: CreateAnonymousPostDto) {
+    return this.postService.createAnonymous(createAnonymousPostDto);
   }
 
   @Get()

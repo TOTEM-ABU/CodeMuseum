@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../../prisma';
 import {
   CreatePostDto,
+  CreateAnonymousPostDto,
   UpdatePostDto,
   CreateReactionDto,
   CreateCommentDto,
@@ -85,6 +86,88 @@ export class PostService {
 
     return {
       message: 'Post created successfully',
+      data: post,
+    };
+  }
+
+  async createAnonymous(createAnonymousPostDto: CreateAnonymousPostDto) {
+    // Convert categoryName to uppercase
+    const categoryName = createAnonymousPostDto.categoryName.toUpperCase();
+
+    // Find existing category
+    const category = await this.prisma.category.findFirst({
+      where: { name: categoryName },
+    });
+
+    if (!category) {
+      throw new BadRequestException(
+        `Category '${categoryName}' does not exist. Please create the category first or use an existing category name.`,
+      );
+    }
+
+    // Create or find anonymous user
+    let anonymousUser = await this.prisma.user.findFirst({
+      where: {
+        username: 'anonymous',
+        email: 'anonymous@gmail.com',
+      },
+    });
+
+    if (!anonymousUser) {
+      anonymousUser = await this.prisma.user.create({
+        data: {
+          username: 'anonymous',
+          email: 'anonymous@gmail.com',
+          password: 'anonymous_password', // This won't be used for authentication
+        },
+      });
+    }
+
+    const post = await this.prisma.post.create({
+      data: {
+        title: createAnonymousPostDto.title,
+        code: createAnonymousPostDto.code,
+        userId: anonymousUser.id,
+        PostCategory: {
+          create: {
+            categoryId: category.id,
+          },
+        },
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            githubURL: true,
+          },
+        },
+        PostCategory: {
+          include: {
+            category: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        comments: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
+        reactions: true,
+      },
+    });
+
+    return {
+      message: 'Anonymous post created successfully',
       data: post,
     };
   }

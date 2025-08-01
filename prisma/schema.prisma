@@ -3,12 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model User {
-  id        String  @id @default(uuid()) @db.Uuid
+  id        String  @id @default(uuid())
   username  String  @unique
   email     String?
   password  String
@@ -22,24 +22,24 @@ model User {
 }
 
 model Comment {
-  id      String @id @default(uuid()) @db.Uuid
+  id      String @id @default(uuid())
   message String
 
-  userId String @db.Uuid
+  userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  postId String @db.Uuid
+  postId String
   Post   Post   @relation(fields: [postId], references: [id])
 
   createdAt DateTime @default(now())
 }
 
 model Post {
-  id    String @id @default(uuid()) @db.Uuid
+  id    String @id @default(uuid())
   title String
   code  String
 
-  userId String @db.Uuid
+  userId String
   user   User   @relation(fields: [userId], references: [id])
 
   comments     Comment[]
@@ -50,19 +50,19 @@ model Post {
 }
 
 model PostCategory {
-  id String @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid())
 
-  postId String @db.Uuid
+  postId String
   post   Post   @relation(fields: [postId], references: [id])
 
-  categoryId String   @db.Uuid
+  categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
 
   createdAt DateTime @default(now())
 }
 
 model Category {
-  id   String @id @default(uuid()) @db.Uuid
+  id   String @id @default(uuid())
   name String
 
   PostCategory PostCategory[]
@@ -71,14 +71,14 @@ model Category {
 }
 
 model Reaction {
-  id      String @id @default(uuid()) @db.Uuid
+  id      String @id @default(uuid())
   like    Int
   dislike Int
 
-  userId String @db.Uuid
+  userId String
   User   User   @relation(fields: [userId], references: [id])
 
-  postId String @db.Uuid
+  postId String
   Post   Post   @relation(fields: [postId], references: [id])
 
   createdAt DateTime @default(now())
