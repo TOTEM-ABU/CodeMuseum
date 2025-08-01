@@ -4,15 +4,54 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma';
-import { UpdateCategoryDto } from './dto';
+import { CreateCategoryDto, UpdateCategoryDto } from './dto';
+import { ProgrammingLanguage } from '@prisma/client';
 
 @Injectable()
 export class CategoryService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(page = 1, limit = 10, name?: string | string[]) {
-    const skip = (page - 1) * limit;
+  async create(createCategoryDto: CreateCategoryDto) {
+    // Validate that categoryName is in ProgrammingLanguage enum
+    if (!Object.values(ProgrammingLanguage).includes(createCategoryDto.name)) {
+      throw new BadRequestException(`Invalid category name. Must be one of: ${Object.values(ProgrammingLanguage).join(', ')}`);
+    }
 
+    // Check if category already exists
+    const existingCategory = await this.prisma.category.findFirst({
+      where: { name: createCategoryDto.name },
+    });
+
+    if (existingCategory) {
+      throw new BadRequestException('Category with this name already exists');
+    }
+
+    const category = await this.prisma.category.create({
+      data: {
+        name: createCategoryDto.name,
+      },
+      include: {
+        posts: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                githubURL: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      message: 'Category created successfully',
+      data: category,
+    };
+  }
+
+  async findAll(name?: string | string[]) {
     // Build where clause for name filtering
     let where = {};
     if (name) {
@@ -34,40 +73,29 @@ export class CategoryService {
       }
     }
 
-    const [categories, total] = await Promise.all([
-      this.prisma.category.findMany({
-        where,
-        skip,
-        take: limit,
-        include: {
-          posts: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  username: true,
-                  githubURL: true,
-                },
+    const categories = await this.prisma.category.findMany({
+      where,
+      include: {
+        posts: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                githubURL: true,
               },
             },
           },
         },
-        orderBy: {
-          createdAt: 'desc',
-        },
-      }),
-      this.prisma.category.count({ where }),
-    ]);
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
 
     return {
       message: 'Categories retrieved successfully',
       data: categories,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
     };
   }
 

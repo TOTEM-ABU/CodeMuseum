@@ -97,7 +97,7 @@ export class PostController {
               title: { type: 'string' },
               code: { type: 'string' },
               userId: { type: 'string' },
-              categoryId: { type: 'string' },
+              categoryId: { type: 'number' },
               createdAt: { type: 'string' },
               user: { type: 'object' },
               category: { type: 'object' },
