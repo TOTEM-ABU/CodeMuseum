@@ -8,7 +8,7 @@ export class JwtGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
-    const token = this.extractTokenFromHeader(request);
+    const token = this.extractTokenFromRequest(request);
     
     if (!token) {
       throw new UnauthorizedException('Token not provided');
@@ -23,8 +23,19 @@ export class JwtGuard implements CanActivate {
     }
   }
 
-  private extractTokenFromHeader(request: Request): string | undefined {
+  private extractTokenFromRequest(request: Request): string | undefined {
+    // First try to get token from Authorization header
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+    if (type === 'Bearer' && token) {
+      return token;
+    }
+
+    // If not found in header, try to get from cookies
+    const cookieToken = request.cookies?.token || request.cookies?.access_token;
+    if (cookieToken) {
+      return cookieToken;
+    }
+
+    return undefined;
   }
 } 

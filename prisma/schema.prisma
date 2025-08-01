@@ -7,27 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum ProgrammingLanguage {
-  JAVASCRIPT
-  PYTHON
-  TYPESCRIPT
-  C
-  JAVA
-  CPP
-  CSHARP
-  RUBY
-  PHP
-  SWIFT
-  KOTLIN
-  RUST
-  GOLANG
-  ELIXIR
-  R
-  HASKELL
-  SCALA
-  DART
-}
-
 model User {
   id        String  @id @default(uuid()) @db.Uuid
   username  String  @unique

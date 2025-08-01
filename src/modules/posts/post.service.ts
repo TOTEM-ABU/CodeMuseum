@@ -18,42 +18,82 @@ export class PostService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createPostDto: CreatePostDto, userId: string) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new NotFoundException('User not found');
+    // Check if user exists
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
 
-    const categoryName = createPostDto.categoryName.toUpperCase();
-    if (!Object.values(ProgrammingLanguage).includes(categoryName as ProgrammingLanguage)) {
-      throw new BadRequestException(
-        `Invalid category name. Must be one of: ${Object.values(ProgrammingLanguage).join(', ')}`,
-      );
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
 
-    let category = await this.prisma.category.findFirst({ where: { name: categoryName } });
+    // Convert categoryName to uppercase
+    const categoryName = createPostDto.categoryName.toUpperCase();
+
+    // Validate that categoryName is in ProgrammingLanguage enum
+    if (!Object.values(ProgrammingLanguage).includes(categoryName as ProgrammingLanguage)) {
+      throw new BadRequestException(`Invalid category name. Must be one of: ${Object.values(ProgrammingLanguage).join(', ')}`);
+    }
+
+    // Find existing category
+    const category = await this.prisma.category.findFirst({
+      where: { name: categoryName },
+    });
+
     if (!category) {
-      category = await this.prisma.category.create({ data: { name: categoryName } });
+      throw new BadRequestException(`Category '${categoryName}' does not exist. Please create the category first or use an existing category name.`);
     }
 
     const post = await this.prisma.post.create({
       data: {
         title: createPostDto.title,
         code: createPostDto.code,
-        userId,
+        userId: userId,
         PostCategory: {
-          create: { categoryId: category.id },
+          create: {
+            categoryId: category.id,
+          },
         },
       },
       include: {
-        user: { select: { id: true, username: true, githubURL: true } },
-        PostCategory: { include: { category: true } },
-        comments: { include: { user: { select: { id: true, username: true } } } },
+        user: {
+          select: {
+            id: true,
+            username: true,
+            githubURL: true,
+          },
+        },
+        PostCategory: {
+          include: {
+            category: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        comments: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
         likes: true,
       },
     });
 
-    return { message: 'Post created successfully', data: post };
+    return {
+      message: 'Post created successfully',
+      data: post,
+    };
   }
 
-  async findAll(page = 1, limit = 10, categoryId?: number, categoryName?: string | string[]) {
+  async findAll(page = 1, limit = 10, categoryId?: string, categoryName?: string | string[]) {
     const skip = (page - 1) * limit;
     let where: any = {};
 
@@ -61,10 +101,14 @@ export class PostService {
       where.PostCategory = { some: { categoryId } };
     }
     if (categoryName) {
-      where.category = {
-        name: Array.isArray(categoryName)
-          ? { in: categoryName }
-          : { contains: categoryName, mode: 'insensitive' },
+      where.PostCategory = {
+        some: {
+          category: {
+            name: Array.isArray(categoryName)
+              ? { in: categoryName }
+              : { contains: categoryName, mode: 'insensitive' },
+          },
+        },
       };
     }
 
@@ -75,7 +119,13 @@ export class PostService {
         take: limit,
         include: {
           user: { select: { id: true, username: true, githubURL: true } },
-          PostCategory: { select: { id: true } },
+          PostCategory: { 
+            include: { 
+              category: { 
+                select: { id: true, name: true } 
+              } 
+            } 
+          },
           comments: { include: { user: { select: { id: true, username: true } } } },
           likes: true,
         },
@@ -106,10 +156,14 @@ export class PostService {
             githubURL: true,
           },
         },
-        category: {
-          select: {
-            id: true,
-            name: true,
+        PostCategory: {
+          include: {
+            category: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
           },
         },
         comments: {
@@ -168,18 +222,13 @@ export class PostService {
         throw new BadRequestException(`Invalid category name. Must be one of: ${Object.values(ProgrammingLanguage).join(', ')}`);
       }
 
-      // Find or create category
-      let category = await this.prisma.category.findFirst({
+      // Find existing category
+      const category = await this.prisma.category.findFirst({
         where: { name: categoryName },
       });
 
       if (!category) {
-        // Create the category if it doesn't exist
-        category = await this.prisma.category.create({
-          data: {
-            name: categoryName,
-          },
-        });
+        throw new BadRequestException(`Category '${categoryName}' does not exist. Please create the category first or use an existing category name.`);
       }
 
       categoryId = category.id;
@@ -188,7 +237,6 @@ export class PostService {
     const updateData: any = {};
     if (updatePostDto.title) updateData.title = updatePostDto.title;
     if (updatePostDto.code) updateData.code = updatePostDto.code;
-    if (categoryId) updateData.categoryId = categoryId;
 
     const updatedPost = await this.prisma.post.update({
       where: { id },
@@ -201,10 +249,14 @@ export class PostService {
             githubURL: true,
           },
         },
-        category: {
-          select: {
-            id: true,
-            name: true,
+        PostCategory: {
+          include: {
+            category: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
           },
         },
         comments: {
@@ -220,6 +272,22 @@ export class PostService {
         likes: true,
       },
     });
+
+    // Update PostCategory if categoryId is provided
+    if (categoryId) {
+      // Delete existing PostCategory relations
+      await this.prisma.postCategory.deleteMany({
+        where: { postId: id },
+      });
+
+      // Create new PostCategory relation
+      await this.prisma.postCategory.create({
+        data: {
+          postId: id,
+          categoryId: categoryId,
+        },
+      });
+    }
 
     return {
       message: 'Post updated successfully',

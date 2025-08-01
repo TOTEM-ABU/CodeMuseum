@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -40,11 +39,10 @@ export class PostController {
         data: {
           type: 'object',
           properties: {
-            id: { type: 'number', example: 1 },
+            id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
             title: { type: 'string', example: 'React Hooks Example' },
             code: { type: 'string', example: 'const [count, setCount] = useState(0);' },
             userId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
-            categoryId: { type: 'number', example: 1 },
             createdAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' },
             user: {
               type: 'object',
@@ -54,13 +52,7 @@ export class PostController {
                 githubURL: { type: 'string' },
               },
             },
-            category: {
-              type: 'object',
-              properties: {
-                id: { type: 'number' },
-                name: { type: 'string' },
-              },
-            },
+            PostCategory: { type: 'array' },
           },
         },
       },
@@ -93,14 +85,13 @@ export class PostController {
           items: {
             type: 'object',
             properties: {
-              id: { type: 'number' },
+              id: { type: 'string' },
               title: { type: 'string' },
               code: { type: 'string' },
               userId: { type: 'string' },
-              categoryId: { type: 'number' },
               createdAt: { type: 'string' },
               user: { type: 'object' },
-              category: { type: 'object' },
+              PostCategory: { type: 'array' },
               comments: { type: 'array' },
               likes: { type: 'array' },
             },
@@ -127,14 +118,14 @@ export class PostController {
     return this.postService.findAll(
       page || 1, 
       limit || 10, 
-      categoryId ? Number(categoryId) : undefined,
+      categoryId,
       categoryName
     );
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a specific post by ID' })
-  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiResponse({
     status: 200,
     description: 'Post retrieved successfully',
@@ -145,14 +136,13 @@ export class PostController {
         data: {
           type: 'object',
           properties: {
-            id: { type: 'number' },
+            id: { type: 'string' },
             title: { type: 'string' },
             code: { type: 'string' },
             userId: { type: 'string' },
-            categoryId: { type: 'string' },
             createdAt: { type: 'string' },
             user: { type: 'object' },
-            category: { type: 'object' },
+            PostCategory: { type: 'array' },
             comments: { type: 'array' },
             likes: { type: 'array' },
           },
@@ -162,13 +152,13 @@ export class PostController {
   })
   @ApiResponse({ status: 400, description: 'Invalid post ID' })
   @ApiResponse({ status: 404, description: 'Post not found' })
-  async findOne(@Param('id', ParseIntPipe) id: string) {
+  async findOne(@Param('id') id: string) {
     return this.postService.findOne(id);
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Update a post' })
-  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiResponse({
     status: 200,
     description: 'Post updated successfully',
@@ -179,14 +169,13 @@ export class PostController {
         data: {
           type: 'object',
           properties: {
-            id: { type: 'number' },
+            id: { type: 'string' },
             title: { type: 'string' },
             code: { type: 'string' },
             userId: { type: 'string' },
-            categoryId: { type: 'number' },
             createdAt: { type: 'string' },
             user: { type: 'object' },
-            category: { type: 'object' },
+            PostCategory: { type: 'array' },
             comments: { type: 'array' },
             likes: { type: 'array' },
           },
@@ -195,12 +184,12 @@ export class PostController {
     },
   })
   @ApiBearerAuth()
-  @ApiResponse({ status: 400, description: 'Bad request, unauthorized, or invalid category name' })
+  @ApiResponse({ status: 400, description: 'Bad request or invalid category name' })
   @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtGuard)
   async update(
-    @Param('id', ParseIntPipe) id: string,
+    @Param('id') id: string,
     @Body() updatePostDto: UpdatePostDto,
     @User() user: any,
   ) {
@@ -209,7 +198,7 @@ export class PostController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a post' })
-  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiResponse({
     status: 200,
     description: 'Post deleted successfully',
@@ -221,25 +210,24 @@ export class PostController {
     },
   })
   @ApiBearerAuth()
-  @ApiResponse({ status: 400, description: 'Invalid post ID or unauthorized' })
+  @ApiResponse({ status: 400, description: 'Invalid post ID' })
   @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtGuard)
-  async remove(@Param('id', ParseIntPipe) id: string, @User() user: any) {
+  async remove(@Param('id') id: string, @User() user: any) {
     return this.postService.remove(id, user.id);
   }
 
   @Post(':id/reactions')
-  @ApiOperation({ summary: 'Add or update reaction (like/dislike) for a post' })
-  @ApiParam({ name: 'id', type: 'number', example: 1 })
-  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Add a reaction to a post' })
+  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiResponse({
     status: 201,
-    description: 'Reaction updated successfully',
+    description: 'Reaction added successfully',
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: 'like updated successfully' },
+        message: { type: 'string', example: 'Reaction added successfully' },
         data: {
           type: 'object',
           properties: {
@@ -247,26 +235,20 @@ export class PostController {
             like: { type: 'number' },
             dislike: { type: 'number' },
             userId: { type: 'string' },
-            postId: { type: 'number' },
+            postId: { type: 'string' },
             createdAt: { type: 'string' },
-            User: {
-              type: 'object',
-              properties: {
-                id: { type: 'string' },
-                username: { type: 'string' },
-              },
-            },
           },
         },
       },
     },
   })
-  @ApiResponse({ status: 400, description: 'Invalid post ID or reaction data' })
-  @ApiResponse({ status: 404, description: 'Post or user not found' })
+  @ApiResponse({ status: 400, description: 'Bad request or unauthorized' })
+  @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiBearerAuth()
   @UseGuards(JwtGuard)
   async addReaction(
-    @Param('id', ParseIntPipe) id: string,
+    @Param('id') id: string,
     @Body() createReactionDto: CreateReactionDto,
     @User() user: any,
   ) {
@@ -275,8 +257,7 @@ export class PostController {
 
   @Post(':id/comment')
   @ApiOperation({ summary: 'Add a comment to a post' })
-  @ApiParam({ name: 'id', type: 'number', example: 1 })
-  @ApiBearerAuth()
+  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiResponse({
     status: 201,
     description: 'Comment added successfully',
@@ -290,26 +271,21 @@ export class PostController {
             id: { type: 'string' },
             message: { type: 'string' },
             userId: { type: 'string' },
-            postId: { type: 'number' },
+            postId: { type: 'string' },
             createdAt: { type: 'string' },
-            user: {
-              type: 'object',
-              properties: {
-                id: { type: 'string' },
-                username: { type: 'string' },
-              },
-            },
+            user: { type: 'object' },
           },
         },
       },
     },
   })
-  @ApiResponse({ status: 400, description: 'Invalid post ID or comment data' })
-  @ApiResponse({ status: 404, description: 'Post or user not found' })
+  @ApiResponse({ status: 400, description: 'Bad request or unauthorized' })
+  @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiBearerAuth()
   @UseGuards(JwtGuard)
   async addComment(
-    @Param('id', ParseIntPipe) id: string,
+    @Param('id') id: string,
     @Body() createCommentDto: CreateCommentDto,
     @User() user: any,
   ) {
@@ -317,8 +293,8 @@ export class PostController {
   }
 
   @Get(':id/comments')
-  @ApiOperation({ summary: 'Get comments for a post' })
-  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  @ApiOperation({ summary: 'Get comments for a specific post with pagination' })
+  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({
@@ -336,15 +312,9 @@ export class PostController {
               id: { type: 'string' },
               message: { type: 'string' },
               userId: { type: 'string' },
-              postId: { type: 'number' },
+              postId: { type: 'string' },
               createdAt: { type: 'string' },
-              user: {
-                type: 'object',
-                properties: {
-                  id: { type: 'string' },
-                  username: { type: 'string' },
-                },
-              },
+              user: { type: 'object' },
             },
           },
         },
@@ -363,7 +333,7 @@ export class PostController {
   @ApiResponse({ status: 400, description: 'Invalid post ID' })
   @ApiResponse({ status: 404, description: 'Post not found' })
   async getComments(
-    @Param('id', ParseIntPipe) id: string,
+    @Param('id') id: string,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ) {
@@ -371,8 +341,8 @@ export class PostController {
   }
 
   @Get(':id/reactions')
-  @ApiOperation({ summary: 'Get all reactions for a post' })
-  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  @ApiOperation({ summary: 'Get reactions for a specific post' })
+  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiResponse({
     status: 200,
     description: 'Reactions retrieved successfully',
@@ -381,36 +351,17 @@ export class PostController {
       properties: {
         message: { type: 'string', example: 'Reactions retrieved successfully' },
         data: {
-          type: 'object',
-          properties: {
-            reactions: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  id: { type: 'string' },
-                  like: { type: 'number' },
-                  dislike: { type: 'number' },
-                  userId: { type: 'string' },
-                  postId: { type: 'number' },
-                  createdAt: { type: 'string' },
-                  User: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string' },
-                      username: { type: 'string' },
-                    },
-                  },
-                },
-              },
-            },
-            summary: {
-              type: 'object',
-              properties: {
-                totalLikes: { type: 'number' },
-                totalDislikes: { type: 'number' },
-                totalReactions: { type: 'number' },
-              },
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              like: { type: 'number' },
+              dislike: { type: 'number' },
+              userId: { type: 'string' },
+              postId: { type: 'string' },
+              createdAt: { type: 'string' },
+              User: { type: 'object' },
             },
           },
         },
@@ -419,13 +370,13 @@ export class PostController {
   })
   @ApiResponse({ status: 400, description: 'Invalid post ID' })
   @ApiResponse({ status: 404, description: 'Post not found' })
-  async getReactions(@Param('id', ParseIntPipe) id: string) {
+  async getReactions(@Param('id') id: string) {
     return this.postService.getLikesByPostId(id);
   }
 
   @Get('user/:userId')
-  @ApiOperation({ summary: 'Get posts by user ID' })
-  @ApiParam({ name: 'userId', type: 'string' })
+  @ApiOperation({ summary: 'Get posts by user ID with pagination' })
+  @ApiParam({ name: 'userId', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({
@@ -440,14 +391,13 @@ export class PostController {
           items: {
             type: 'object',
             properties: {
-              id: { type: 'number' },
+              id: { type: 'string' },
               title: { type: 'string' },
               code: { type: 'string' },
               userId: { type: 'string' },
-              categoryId: { type: 'string' },
               createdAt: { type: 'string' },
               user: { type: 'object' },
-              category: { type: 'object' },
+              PostCategory: { type: 'array' },
               comments: { type: 'array' },
               likes: { type: 'array' },
             },
