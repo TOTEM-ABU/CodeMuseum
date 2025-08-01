@@ -8,22 +8,23 @@ import { Protected } from "src/decoratores";
 
 @ApiTags('Authentication')
 @Controller('auth')
-export class AuthController{
-
-  constructor(private readonly service: AuthService){}
+export class AuthController {
+  constructor(private readonly service: AuthService) {}
 
   @Get()
+  @Protected(true)
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Users retrieved successfully' })
-  async getAll(){
+  async getAll() {
     return await this.service.getAll();
   }
 
   @Post('register')
+  @Protected(false)
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: RegisterDto })
-  @ApiResponse({ 
-    status: 201, 
+  @ApiResponse({
+    status: 201,
     description: 'User registered successfully',
     schema: {
       type: 'object',
@@ -44,15 +45,19 @@ export class AuthController{
     },
   })
   @ApiResponse({ status: 400, description: 'User already exists' })
-  async register(@Body() body: RegisterDto, @Res({ passthrough: true }) res: Response){
+  async register(
+    @Body() body: RegisterDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return await this.service.register(body, res);
   }
 
   @Post('login')
+  @Protected(false)
   @ApiOperation({ summary: 'Login user' })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'User logged in successfully',
     schema: {
       type: 'object',
@@ -63,14 +68,18 @@ export class AuthController{
   })
   @ApiResponse({ status: 400, description: 'Password error' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async login(@Body() body: LoginDto, @Res({ passthrough: true }) res: Response){
+  async login(
+    @Body() body: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return await this.service.login(body, res);
   }
 
   @Delete(':id')
+  @Protected(true)
   @ApiOperation({ summary: 'Delete user' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'User deleted successfully',
     schema: {
       type: 'object',
@@ -81,7 +90,10 @@ export class AuthController{
   })
   @ApiResponse({ status: 400, description: 'Invalid ID format' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async delete(@Param('id') id: string, @Res({ passthrough: true }) res: Response){
+  async delete(
+    @Param('id') id: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return await this.service.delete(id, res);
   }
 }

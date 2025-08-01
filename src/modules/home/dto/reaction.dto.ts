@@ -6,7 +6,7 @@ export class ReactionDto {
     description: 'Reaksiya berilayotgan postning ID raqami',
     example: 1,
   })
-  postId: number;
+  postId: string;
 
   @ApiProperty({
     description: 'Reaksiya yuborayotgan foydalanuvchining ID raqami',

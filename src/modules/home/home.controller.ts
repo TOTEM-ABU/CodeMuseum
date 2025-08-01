@@ -17,7 +17,7 @@ export class HomeController {
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ) {
-    return this.homeService.getAllPosts(categoryId ? Number(categoryId) : undefined, Number(page) || 1, Number(limit) || 10);
+    return this.homeService.getAllPosts(categoryId ? categoryId : undefined, Number(page) || 1, Number(limit) || 10);
   }
 
   @Post('leave-comment')
@@ -27,7 +27,7 @@ export class HomeController {
 
   @Get('comments-by-post-id/:postId')
   getComments(@Param('postId') postId: string) {
-    return this.homeService.getCommentsByPostId(Number(postId));
+    return this.homeService.getCommentsByPostId(postId);
   }
 
   @Post('reaction')

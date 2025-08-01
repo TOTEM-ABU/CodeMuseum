@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -36,10 +35,10 @@ export class CategoryController {
         data: {
           type: 'object',
           properties: {
-            id: { type: 'number', example: 1 },
+            id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
             name: { type: 'string', example: 'JAVASCRIPT' },
             createdAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' },
-            posts: { type: 'array' },
+            PostCategory: { type: 'array' },
           },
         },
       },
@@ -51,7 +50,9 @@ export class CategoryController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all categories with filtering' })
+  @ApiOperation({ summary: 'Get all categories with pagination and filtering' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiQuery({ name: 'name', required: false, type: String, example: 'JavaScript', description: 'Filter by category name (can be multiple)' })
   @ApiResponse({
     status: 200,
@@ -65,23 +66,36 @@ export class CategoryController {
           items: {
             type: 'object',
             properties: {
-              id: { type: 'number' },
+              id: { type: 'string' },
               name: { type: 'string' },
               createdAt: { type: 'string' },
-              posts: { type: 'array' },
+              PostCategory: { type: 'array' },
             },
+          },
+        },
+        pagination: {
+          type: 'object',
+          properties: {
+            page: { type: 'number' },
+            limit: { type: 'number' },
+            total: { type: 'number' },
+            totalPages: { type: 'number' },
           },
         },
       },
     },
   })
-  async findAll(@Query('name') name?: string | string[]) {
-    return this.categoryService.findAll(name);
+  async findAll(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('name') name?: string | string[],
+  ) {
+    return this.categoryService.findAll(page || 1, limit || 10, name);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a specific category by ID' })
-  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiResponse({
     status: 200,
     description: 'Category retrieved successfully',
@@ -92,10 +106,10 @@ export class CategoryController {
         data: {
           type: 'object',
           properties: {
-            id: { type: 'number' },
+            id: { type: 'string' },
             name: { type: 'string' },
             createdAt: { type: 'string' },
-            posts: { type: 'array' },
+            PostCategory: { type: 'array' },
           },
         },
       },
@@ -103,13 +117,13 @@ export class CategoryController {
   })
   @ApiResponse({ status: 400, description: 'Invalid category ID' })
   @ApiResponse({ status: 404, description: 'Category not found' })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param('id') id: string) {
     return this.categoryService.findOne(id);
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Update a category' })
-  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiResponse({
     status: 200,
     description: 'Category updated successfully',
@@ -120,10 +134,10 @@ export class CategoryController {
         data: {
           type: 'object',
           properties: {
-            id: { type: 'number' },
+            id: { type: 'string' },
             name: { type: 'string' },
             createdAt: { type: 'string' },
-            posts: { type: 'array' },
+            PostCategory: { type: 'array' },
           },
         },
       },
@@ -132,7 +146,7 @@ export class CategoryController {
   @ApiResponse({ status: 400, description: 'Bad request or name already exists' })
   @ApiResponse({ status: 404, description: 'Category not found' })
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
     return this.categoryService.update(id, updateCategoryDto);
@@ -140,7 +154,7 @@ export class CategoryController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a category' })
-  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  @ApiParam({ name: 'id', type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiResponse({
     status: 200,
     description: 'Category deleted successfully',
@@ -153,7 +167,7 @@ export class CategoryController {
   })
   @ApiResponse({ status: 400, description: 'Invalid category ID or has posts' })
   @ApiResponse({ status: 404, description: 'Category not found' })
-  async remove(@Param('id', ParseIntPipe) id: number) {
+  async remove(@Param('id') id: string) {
     return this.categoryService.remove(id);
   }
 } 

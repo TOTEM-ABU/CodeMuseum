@@ -31,13 +31,17 @@ export class CategoryService {
         name: createCategoryDto.name,
       },
       include: {
-        posts: {
+        PostCategory: {
           include: {
-            user: {
-              select: {
-                id: true,
-                username: true,
-                githubURL: true,
+            post: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    username: true,
+                    githubURL: true,
+                  },
+                },
               },
             },
           },
@@ -51,7 +55,9 @@ export class CategoryService {
     };
   }
 
-  async findAll(name?: string | string[]) {
+  async findAll(page = 1, limit = 10, name?: string | string[]) {
+    const skip = (page - 1) * limit;
+
     // Build where clause for name filtering
     let where = {};
     if (name) {
@@ -73,63 +79,79 @@ export class CategoryService {
       }
     }
 
-    const categories = await this.prisma.category.findMany({
-      where,
-      include: {
-        posts: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                username: true,
-                githubURL: true,
+    const [categories, total] = await Promise.all([
+      this.prisma.category.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          PostCategory: {
+            include: {
+              post: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      username: true,
+                      githubURL: true,
+                    },
+                  },
+                },
               },
             },
           },
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.category.count({ where }),
+    ]);
 
     return {
       message: 'Categories retrieved successfully',
       data: categories,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     };
   }
 
-  async findOne(id: number) {
-    if (!Number.isInteger(id) || id <= 0) {
+  async findOne(id: string) {
+    if (!id) {
       throw new BadRequestException('Invalid category ID');
     }
 
     const category = await this.prisma.category.findUnique({
       where: { id },
       include: {
-        posts: {
+        PostCategory: {
           include: {
-            user: {
-              select: {
-                id: true,
-                username: true,
-                githubURL: true,
-              },
-            },
-            comments: {
+            post: {
               include: {
                 user: {
                   select: {
                     id: true,
                     username: true,
+                    githubURL: true,
                   },
                 },
+                comments: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        username: true,
+                      },
+                    },
+                  },
+                },
+                likes: true,
               },
             },
-            likes: true,
-          },
-          orderBy: {
-            createdAt: 'desc',
           },
         },
       },
@@ -145,11 +167,7 @@ export class CategoryService {
     };
   }
 
-  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    if (!Number.isInteger(id) || id <= 0) {
-      throw new BadRequestException('Invalid category ID');
-    }
-
+  async update(id: string, updateCategoryDto: UpdateCategoryDto) {
     const category = await this.prisma.category.findUnique({
       where: { id },
     });
@@ -158,12 +176,11 @@ export class CategoryService {
       throw new NotFoundException('Category not found');
     }
 
-    // Check if name already exists (if name is being updated)
     if (updateCategoryDto.name && updateCategoryDto.name !== category.name) {
       const existingCategory = await this.prisma.category.findFirst({
-        where: { 
+        where: {
           name: updateCategoryDto.name,
-          id: { not: id }
+          id: { not: id },
         },
       });
 
@@ -178,13 +195,17 @@ export class CategoryService {
         ...(updateCategoryDto.name && { name: updateCategoryDto.name }),
       },
       include: {
-        posts: {
+        PostCategory: {
           include: {
-            user: {
-              select: {
-                id: true,
-                username: true,
-                githubURL: true,
+            post: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    username: true,
+                    githubURL: true,
+                  },
+                },
               },
             },
           },
@@ -198,15 +219,15 @@ export class CategoryService {
     };
   }
 
-  async remove(id: number) {
-    if (!Number.isInteger(id) || id <= 0) {
+  async remove(id: string) {
+    if (!id) {
       throw new BadRequestException('Invalid category ID');
     }
 
     const category = await this.prisma.category.findUnique({
       where: { id },
       include: {
-        posts: true,
+        PostCategory: true,
       },
     });
 
@@ -214,9 +235,10 @@ export class CategoryService {
       throw new NotFoundException('Category not found');
     }
 
-    // Check if category has posts
-    if (category.posts.length > 0) {
-      throw new BadRequestException('Cannot delete category with existing posts');
+    if (category.PostCategory.length > 0) {
+      throw new BadRequestException(
+        'Cannot delete category with existing posts',
+      );
     }
 
     await this.prisma.category.delete({
