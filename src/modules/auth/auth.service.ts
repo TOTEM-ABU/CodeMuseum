@@ -92,6 +92,7 @@ export class AuthService {
 
     return {
       message: 'success',
+      data: foundUser,
       token: token,
     };
   }
