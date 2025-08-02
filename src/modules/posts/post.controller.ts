@@ -73,7 +73,6 @@ export class PostController {
       },
     },
   })
-  @ApiBearerAuth()
   @ApiResponse({
     status: 400,
     description: 'Bad request or invalid category name',
@@ -268,7 +267,6 @@ export class PostController {
       },
     },
   })
-  @ApiBearerAuth()
   @ApiResponse({
     status: 400,
     description: 'Bad request or invalid category name',
@@ -301,7 +299,6 @@ export class PostController {
       },
     },
   })
-  @ApiBearerAuth()
   @ApiResponse({ status: 400, description: 'Invalid post ID' })
   @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -341,7 +338,6 @@ export class PostController {
   @ApiResponse({ status: 400, description: 'Bad request or unauthorized' })
   @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiBearerAuth()
   @UseGuards(JwtGuard)
   async addReaction(
     @Param('id') id: string,
@@ -382,7 +378,6 @@ export class PostController {
   @ApiResponse({ status: 400, description: 'Bad request or unauthorized' })
   @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiBearerAuth()
   @UseGuards(JwtGuard)
   async addComment(
     @Param('id') id: string,
