@@ -4,7 +4,6 @@ import { AuthService } from "./auth.service";
 import { PrismaService } from "src/prisma";
 import { JwtHelper } from "src/helpers";
 import { JwtService, JwtModule } from "@nestjs/jwt";
-import { JwtGuard } from "./guards/jwt.guard";
 
 @Module({
   imports: [
