@@ -48,7 +48,6 @@ export class CategoryController {
       },
     },
   })
-  @ApiBearerAuth()
   @ApiResponse({ status: 400, description: 'Category name already exists or invalid category name' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtGuard)
@@ -150,7 +149,6 @@ export class CategoryController {
       },
     },
   })
-  @ApiBearerAuth()
   @ApiResponse({ status: 400, description: 'Bad request or name already exists' })
   @ApiResponse({ status: 404, description: 'Category not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -176,7 +174,6 @@ export class CategoryController {
       },
     },
   })
-  @ApiBearerAuth()
   @ApiResponse({ status: 400, description: 'Invalid category ID or has posts' })
   @ApiResponse({ status: 404, description: 'Category not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
