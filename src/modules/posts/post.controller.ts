@@ -271,7 +271,6 @@ export class PostController {
   })
   @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @UseGuards(JwtGuard)
   async update(
     @Param('id') id: string,
     @Body() updatePostDto: UpdatePostDto,
@@ -335,7 +334,6 @@ export class PostController {
   @ApiResponse({ status: 400, description: 'Bad request or unauthorized' })
   @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @UseGuards(JwtGuard)
   async addReaction(
     @Param('id') id: string,
     @Body() createReactionDto: CreateReactionDto,
