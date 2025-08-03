@@ -6,8 +6,7 @@ import {
   Param,
   Post,
   Put,
-  Query,
-  UseGuards,
+  Query
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -174,7 +173,6 @@ export class CategoryController {
   @ApiResponse({ status: 400, description: 'Invalid category ID or has posts' })
   @ApiResponse({ status: 404, description: 'Category not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @UseGuards(JwtGuard)
   async remove(@Param('id') id: string, @User() user: any) {
     return this.categoryService.remove(id);
   }
