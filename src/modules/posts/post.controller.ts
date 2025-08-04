@@ -7,7 +7,7 @@ import {
   Post,
   Put,
   Query,
-  UseGuards,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -15,7 +15,6 @@ import {
   ApiResponse,
   ApiParam,
   ApiQuery,
-  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { PostService } from './post.service';
 import {
@@ -25,7 +24,8 @@ import {
   CreateReactionDto,
   CreateCommentDto,
 } from './dto';
-import { User } from '../auth/decorators/user.decorator';
+import { Protected } from 'src/decoratores';
+import { Request } from 'express';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -77,9 +77,10 @@ export class PostController {
     description: 'Bad request or invalid category name',
   })
   @ApiResponse({ status: 404, description: 'User not found' })
+  @Protected(true)
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async create(@Body() createPostDto: CreatePostDto, @User() user: any) {
-    return this.postService.create(createPostDto, user.id);
+  async create(@Body() createPostDto: CreatePostDto, @Req() req: Request & { userId: string }) {
+    return this.postService.create(createPostDto, req.userId);
   }
 
   @Post('anonymous')
@@ -270,13 +271,14 @@ export class PostController {
     description: 'Bad request or invalid category name',
   })
   @ApiResponse({ status: 404, description: 'Post not found' })
+  @Protected(true)
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async update(
     @Param('id') id: string,
     @Body() updatePostDto: UpdatePostDto,
-    @User() user: any,
+    @Req() req: Request & { userId: string },
   ) {
-    return this.postService.update(id, updatePostDto, user.id);
+    return this.postService.update(id, updatePostDto, req.userId);
   }
 
   @Delete(':id')
@@ -298,9 +300,10 @@ export class PostController {
   })
   @ApiResponse({ status: 400, description: 'Invalid post ID' })
   @ApiResponse({ status: 404, description: 'Post not found' })
+  @Protected(true)
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async remove(@Param('id') id: string, @User() user: any) {
-    return this.postService.remove(id, user.id);
+  async remove(@Param('id') id: string, @Req() req: Request & { userId: string }) {
+    return this.postService.remove(id, req.userId);
   }
 
   @Post(':id/reactions')
@@ -333,13 +336,14 @@ export class PostController {
   })
   @ApiResponse({ status: 400, description: 'Bad request or unauthorized' })
   @ApiResponse({ status: 404, description: 'Post not found' })
+  @Protected(true)
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async addReaction(
     @Param('id') id: string,
     @Body() createReactionDto: CreateReactionDto,
-    @User() user: any,
+    @Req() req: Request & { userId: string },
   ) {
-    return this.postService.addReaction(id, user.id, createReactionDto);
+    return this.postService.addReaction(id, req.userId, createReactionDto);
   }
 
   @Post(':id/comments')
@@ -373,13 +377,14 @@ export class PostController {
   })
   @ApiResponse({ status: 400, description: 'Bad request or unauthorized' })
   @ApiResponse({ status: 404, description: 'Post not found' })
+  @Protected(true)
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async addComment(
     @Param('id') id: string,
     @Body() createCommentDto: CreateCommentDto,
-    @User() user: any,
+    @Req() req: Request & { userId: string },
   ) {
-    return this.postService.addComment(id, user.id, createCommentDto);
+    return this.postService.addComment(id, req.userId, createCommentDto);
   }
 
   @Get(':id/comments')
