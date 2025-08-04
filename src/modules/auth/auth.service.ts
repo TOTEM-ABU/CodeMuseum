@@ -50,9 +50,7 @@ export class AuthService {
     const token = await this.jwt.generateToken({ id: newUser.id });
 
     res.cookie('token', token, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: false,
       maxAge: 1000 * 60 * 60 * 24,
     });
 
@@ -84,9 +82,7 @@ export class AuthService {
     const token = await this.jwt.generateToken({ id: foundUser.id });
 
     res.cookie('token', token, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: false,
       maxAge: 1000 * 60 * 60 * 24,
     });
 

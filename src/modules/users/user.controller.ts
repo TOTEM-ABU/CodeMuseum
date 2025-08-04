@@ -8,13 +8,10 @@ import {
 } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto';
-import { JwtGuard } from '../auth/guards/jwt.guard';
 import { User } from '../auth/decorators/user.decorator';
 
 @ApiTags('Users')
 @Controller('users')
-@UseGuards(JwtGuard)
-// @ApiBearerAuth()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

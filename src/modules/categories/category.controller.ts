@@ -6,8 +6,7 @@ import {
   Param,
   Post,
   Put,
-  Query,
-  UseGuards,
+  Query
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,7 +18,6 @@ import {
 } from '@nestjs/swagger';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto';
-import { JwtGuard } from '../auth/guards/jwt.guard';
 import { User } from '../auth/decorators/user.decorator';
 
 @ApiTags('Categories')
@@ -48,10 +46,8 @@ export class CategoryController {
       },
     },
   })
-  @ApiBearerAuth()
   @ApiResponse({ status: 400, description: 'Category name already exists or invalid category name' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @UseGuards(JwtGuard)
   async create(@Body() createCategoryDto: CreateCategoryDto, @User() user: any) {
     return this.categoryService.create(createCategoryDto);
   }
@@ -150,11 +146,9 @@ export class CategoryController {
       },
     },
   })
-  @ApiBearerAuth()
   @ApiResponse({ status: 400, description: 'Bad request or name already exists' })
   @ApiResponse({ status: 404, description: 'Category not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @UseGuards(JwtGuard)
   async update(
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
@@ -176,11 +170,9 @@ export class CategoryController {
       },
     },
   })
-  @ApiBearerAuth()
   @ApiResponse({ status: 400, description: 'Invalid category ID or has posts' })
   @ApiResponse({ status: 404, description: 'Category not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @UseGuards(JwtGuard)
   async remove(@Param('id') id: string, @User() user: any) {
     return this.categoryService.remove(id);
   }

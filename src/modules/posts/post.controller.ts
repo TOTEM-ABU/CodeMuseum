@@ -25,7 +25,6 @@ import {
   CreateReactionDto,
   CreateCommentDto,
 } from './dto';
-import { JwtGuard } from '../auth/guards/jwt.guard';
 import { User } from '../auth/decorators/user.decorator';
 
 @ApiTags('Posts')
@@ -73,14 +72,12 @@ export class PostController {
       },
     },
   })
-  // @ApiBearerAuth()
   @ApiResponse({
     status: 400,
     description: 'Bad request or invalid category name',
   })
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @UseGuards(JwtGuard)
   async create(@Body() createPostDto: CreatePostDto, @User() user: any) {
     return this.postService.create(createPostDto, user.id);
   }
@@ -268,14 +265,12 @@ export class PostController {
       },
     },
   })
-  @ApiBearerAuth()
   @ApiResponse({
     status: 400,
     description: 'Bad request or invalid category name',
   })
   @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @UseGuards(JwtGuard)
   async update(
     @Param('id') id: string,
     @Body() updatePostDto: UpdatePostDto,
@@ -301,11 +296,9 @@ export class PostController {
       },
     },
   })
-  @ApiBearerAuth()
   @ApiResponse({ status: 400, description: 'Invalid post ID' })
   @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @UseGuards(JwtGuard)
   async remove(@Param('id') id: string, @User() user: any) {
     return this.postService.remove(id, user.id);
   }
@@ -341,8 +334,6 @@ export class PostController {
   @ApiResponse({ status: 400, description: 'Bad request or unauthorized' })
   @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiBearerAuth()
-  @UseGuards(JwtGuard)
   async addReaction(
     @Param('id') id: string,
     @Body() createReactionDto: CreateReactionDto,
@@ -383,8 +374,6 @@ export class PostController {
   @ApiResponse({ status: 400, description: 'Bad request or unauthorized' })
   @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiBearerAuth()
-  @UseGuards(JwtGuard)
   async addComment(
     @Param('id') id: string,
     @Body() createCommentDto: CreateCommentDto,
