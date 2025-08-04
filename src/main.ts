@@ -9,10 +9,12 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  app.enableCors({
-    origin: process.env.CLIENT_DOMEN
-  ? process.env.CLIENT_DOMEN.split(',').map(d => d.trim())
-  : [],
+   app.enableCors({
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://code-musuem.vercel.app',
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['authorization', 'content-type'],
