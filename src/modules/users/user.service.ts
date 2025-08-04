@@ -6,12 +6,14 @@ import {
 import { PrismaService } from '../../prisma';
 import { UpdateUserDto } from './dto';
 import { isUUID } from 'validator';
+import { Request } from 'express';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getProfile(userId: string) {
+  async getProfile(req: Request & { userId: string }) {
+    const userId = req.userId;
     if (!isUUID(userId)) {
       throw new BadRequestException('Invalid user ID');
     }
@@ -97,11 +99,12 @@ export class UserService {
   }
 
   async getMyReactions(
-    userId: string,
+    req: Request & { userId: string },
     page = 1,
     limit = 10,
     type?: 'like' | 'dislike',
   ) {
+    const userId = req.userId;
     if (!isUUID(userId)) {
       throw new BadRequestException('Invalid user ID');
     }
@@ -164,7 +167,9 @@ export class UserService {
     };
   }
 
-  async updateSettings(userId: string, updateUserDto: UpdateUserDto) {
+  async updateSettings(req: Request & { userId: string }, updateUserDto: UpdateUserDto) {
+
+    const userId = req.userId;
     if (!isUUID(userId)) {
       throw new BadRequestException('Invalid user ID');
     }
@@ -210,7 +215,8 @@ export class UserService {
     };
   }
 
-  async getMyPosts(userId: string, page = 1, limit = 10) {
+  async getMyPosts(req: Request & { userId: string }, page = 1, limit = 10) {
+    const userId = req.userId;
     if (!isUUID(userId)) {
       throw new BadRequestException('Invalid user ID');
     }
@@ -259,7 +265,9 @@ export class UserService {
     };
   }
 
-  async getMyComments(userId: string, page = 1, limit = 10) {
+  async getMyComments(req: Request & { userId: string }, page = 1, limit = 10) {
+
+    const userId = req.userId;
     if (!isUUID(userId)) {
       throw new BadRequestException('Invalid user ID');
     }

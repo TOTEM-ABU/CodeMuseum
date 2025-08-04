@@ -1,14 +1,15 @@
-import { Body, Controller, Get, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Put, Query, Req, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiQuery,
-  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto';
 import { User } from '../auth/decorators/user.decorator';
+import { Protected } from 'src/decoratores';
+import { Request } from 'express';
 
 @ApiTags('Users')
 @Controller('users')
@@ -16,6 +17,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('profile')
+  @Protected(true)
   @ApiOperation({ summary: 'Get current user profile with recent activity' })
   @ApiResponse({
     status: 200,
@@ -90,11 +92,12 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Invalid user ID' })
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getProfile(@User() user: any) {
-    return this.userService.getProfile(user.id);
+  async getProfile(@Req() req: Request & { userId: string }) {
+    return this.userService.getProfile(req);
   }
 
   @Get('my-reactions')
+  @Protected(true)
   @ApiOperation({ summary: 'Get current user reactions (likes/dislikes)' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
@@ -154,20 +157,16 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Invalid user ID' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getMyReactions(
-    @User() user: any,
+    @Req() req: Request & { userId: string },
     @Query('page') page?: number,
     @Query('limit') limit?: number,
     @Query('type') type?: 'like' | 'dislike',
   ) {
-    return this.userService.getMyReactions(
-      user.id,
-      page || 1,
-      limit || 10,
-      type,
-    );
+    return this.userService.getMyReactions(req, page || 1, limit || 10, type);
   }
 
   @Get('my-posts')
+  @Protected(true)
   @ApiOperation({ summary: 'Get current user posts' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
@@ -211,14 +210,15 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Invalid user ID' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getMyPosts(
-    @User() user: any,
+    @Req() req: Request & { userId: string },
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ) {
-    return this.userService.getMyPosts(user.id, page || 1, limit || 10);
+    return this.userService.getMyPosts(req, page || 1, limit || 10);
   }
 
   @Get('my-comments')
+  @Protected(true)
   @ApiOperation({ summary: 'Get current user comments' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
@@ -269,14 +269,15 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Invalid user ID' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getMyComments(
-    @User() user: any,
+    @Req() req: Request & { userId: string },
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ) {
-    return this.userService.getMyComments(user.id, page || 1, limit || 10);
+    return this.userService.getMyComments(req, page || 1, limit || 10);
   }
 
   @Put('settings')
+  @Protected(true)
   @ApiOperation({ summary: 'Update user profile settings' })
   @ApiResponse({
     status: 200,
@@ -308,9 +309,9 @@ export class UserController {
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async updateSettings(
-    @User() user: any,
+    @Req() req: Request & { userId: string },
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.userService.updateSettings(user.id, updateUserDto);
+    return this.userService.updateSettings(req, updateUserDto);
   }
 }
