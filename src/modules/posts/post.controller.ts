@@ -73,7 +73,7 @@ export class PostController {
       },
     },
   })
-  @ApiBearerAuth()
+  // @ApiBearerAuth()
   @ApiResponse({
     status: 400,
     description: 'Bad request or invalid category name',
@@ -351,12 +351,13 @@ export class PostController {
     return this.postService.addReaction(id, user.id, createReactionDto);
   }
 
-  @Post(':id/comment')
+  @Post(':id/comments')
   @ApiOperation({ summary: 'Add a comment to a post' })
   @ApiParam({
     name: 'id',
     type: 'string',
     example: '123e4567-e89b-12d3-a456-426614174000',
+    description: 'Post ID where the comment will be added',
   })
   @ApiResponse({
     status: 201,

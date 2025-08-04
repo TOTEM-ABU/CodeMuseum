@@ -480,7 +480,11 @@ export class PostService {
     if (!user) throw new NotFoundException('User not found');
 
     const comment = await this.prisma.comment.create({
-      data: { message: createCommentDto.message, userId, postId },
+      data: { 
+        message: createCommentDto.message, 
+        userId: userId, 
+        postId: postId 
+      },
       include: { user: { select: { id: true, username: true } } },
     });
 
