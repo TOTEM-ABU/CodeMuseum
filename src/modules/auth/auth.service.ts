@@ -49,10 +49,13 @@ export class AuthService {
 
     const token = await this.jwt.generateToken({ id: newUser.id });
 
-    res.cookie('token', token, {
-      secure: false,
-      maxAge: 1000 * 60 * 60 * 24,
-    });
+   res.cookie('token', token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production', 
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  maxAge: 1000 * 60 * 60 * 24, 
+   });
+
 
     return {
       message: 'success',
@@ -81,10 +84,13 @@ export class AuthService {
 
     const token = await this.jwt.generateToken({ id: foundUser.id });
 
-    res.cookie('token', token, {
-      secure: false,
-      maxAge: 1000 * 60 * 60 * 24,
-    });
+   res.cookie('token', token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production', 
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  maxAge: 1000 * 60 * 60 * 24, /
+});
+
 
     return {
       message: 'success',
