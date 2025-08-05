@@ -143,6 +143,8 @@ export class UserService {
               PostCategory: {
                 select: {
                   id: true,
+                  category: true,
+                  post: true
                 },
               },
             },
