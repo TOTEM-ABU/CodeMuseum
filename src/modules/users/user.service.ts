@@ -240,6 +240,7 @@ export class UserService {
           PostCategory: {
             select: {
               id: true,
+              category: true
             },
           },
           comments: {
