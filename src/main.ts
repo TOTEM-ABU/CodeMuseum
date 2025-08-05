@@ -10,10 +10,8 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.enableCors({
-    origin: process.env.CLIENT_DOMEN
-  ? process.env.CLIENT_DOMEN.split(',').map(d => d.trim())
-  : [],
-    credentials: true,
+    origin: "*",
+    credentials: false,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['authorization', 'content-type'],
     optionsSuccessStatus: 200,

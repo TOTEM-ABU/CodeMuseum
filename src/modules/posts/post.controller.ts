@@ -139,14 +139,8 @@ export class PostController {
     name: 'categoryId',
     required: false,
     type: String,
-    description: 'Filter by category ID',
-  })
-  @ApiQuery({
-    name: 'categoryName',
-    required: false,
-    type: String,
-    example: 'JavaScript',
-    description: 'Filter by category name (can be multiple)',
+    isArray: true,
+    description: 'Filter by one or more category IDs (comma separated or repeated)',
   })
   @ApiResponse({
     status: 200,
@@ -187,14 +181,12 @@ export class PostController {
   async findAll(
     @Query('page') page?: number,
     @Query('limit') limit?: number,
-    @Query('categoryId') categoryId?: string,
-    @Query('categoryName') categoryName?: string | string[],
+    @Query('categoryId') categoryId?: string | string[],
   ) {
     return this.postService.findAll(
       page || 1,
       limit || 10,
       categoryId,
-      categoryName,
     );
   }
 

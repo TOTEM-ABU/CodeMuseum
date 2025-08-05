@@ -175,25 +175,18 @@ export class PostService {
   async findAll(
     page = 1,
     limit = 10,
-    categoryId?: string,
-    categoryName?: string | string[],
+    categoryId?: string | string[],
   ) {
     const skip = (page - 1) * limit;
     let where: any = {};
 
     if (categoryId) {
-      where.PostCategory = { some: { categoryId } };
-    }
-    if (categoryName) {
-      where.PostCategory = {
-        some: {
-          category: {
-            name: Array.isArray(categoryName)
-              ? { in: categoryName }
-              : { contains: categoryName, mode: 'insensitive' },
-          },
-        },
-      };
+      const ids = Array.isArray(categoryId)
+        ? categoryId
+        : typeof categoryId === 'string' && categoryId.includes(',')
+        ? categoryId.split(',').map((id) => id.trim())
+        : [categoryId];
+      where.PostCategory = { some: { categoryId: { in: ids } } };
     }
 
     const [posts, total] = await Promise.all([
@@ -215,7 +208,7 @@ export class PostService {
           },
           reactions: true,
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { id: 'desc' },
       }),
       this.prisma.post.count({ where }),
     ]);
