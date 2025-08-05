@@ -229,6 +229,14 @@ export class UserService {
         skip,
         take: limit,
         include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              githubURL: true,
+            }
+          },
           PostCategory: {
             select: {
               id: true,
