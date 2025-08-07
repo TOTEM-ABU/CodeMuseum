@@ -18,7 +18,6 @@ export class PostService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createPostDto: CreatePostDto, userId: string) {
-    // Check if user exists
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -172,23 +171,27 @@ export class PostService {
     };
   }
 
-  async findAll(
-    page = 1,
-    limit = 10,
-    categoryId?: string | string[],
-  ) {
+  /**
+   * Get paginated posts with optional category filter
+   * @param page - page number (default: 1)
+   * @param limit - items per page (default: 10)
+   * @param categoryId - filter by category id(s), can be string or array
+   */
+  async findAll(page = 1, limit = 10, categoryId?: string | string[]) {
     const skip = (page - 1) * limit;
     let where: any = {};
 
+    // Agar categoryId kelgan bo'lsa, filterlash
     if (categoryId) {
       const ids = Array.isArray(categoryId)
         ? categoryId
         : typeof categoryId === 'string' && categoryId.includes(',')
-        ? categoryId.split(',').map((id) => id.trim())
-        : [categoryId];
+          ? categoryId.split(',').map((id) => id.trim())
+          : [categoryId];
       where.PostCategory = { some: { categoryId: { in: ids } } };
     }
 
+    // Postlar va umumiy sonini olish
     const [posts, total] = await Promise.all([
       this.prisma.post.findMany({
         where,
@@ -198,9 +201,7 @@ export class PostService {
           user: { select: { id: true, username: true, githubURL: true } },
           PostCategory: {
             include: {
-              category: {
-                select: { id: true, name: true },
-              },
+              category: { select: { id: true, name: true } },
             },
           },
           comments: {
@@ -213,10 +214,18 @@ export class PostService {
       this.prisma.post.count({ where }),
     ]);
 
+    // Pagination obyektini qaytarish
     return {
       message: 'Posts retrieved successfully',
       data: posts,
-      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNextPage: page * limit < total,
+        hasPrevPage: page > 1,
+      },
     };
   }
 
@@ -473,10 +482,10 @@ export class PostService {
     if (!user) throw new NotFoundException('User not found');
 
     const comment = await this.prisma.comment.create({
-      data: { 
-        message: createCommentDto.message, 
-        userId: userId, 
-        postId: postId 
+      data: {
+        message: createCommentDto.message,
+        userId: userId,
+        postId: postId,
       },
       include: { user: { select: { id: true, username: true } } },
     });
